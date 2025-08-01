@@ -65,6 +65,7 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
           value={ENV_IDS.KNOWLEDGE_ID}
           disabled={true}
           className="bg-zinc-800 text-zinc-400"
+          onChange={() => {}}
         />
       </Field>
       <Field label="Avatar ID (Fixed)">
@@ -73,6 +74,7 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
           value={ENV_IDS.AVATAR_ID}
           disabled={true}
           className="bg-zinc-800 text-zinc-400"
+          onChange={() => {}}
         />
       </Field>
       <Field label="Language">
@@ -116,6 +118,7 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
               value={ENV_IDS.VOICE_ID}
               disabled={true}
               className="bg-zinc-800 text-zinc-400"
+              onChange={() => {}}
             />
           </Field>
           <Field label="Emotion">

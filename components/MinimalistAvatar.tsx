@@ -6,7 +6,6 @@ import {
   StartAvatarRequest,
   STTProvider,
   ElevenLabsModel,
-  TaskType,
 } from "@heygen/streaming-avatar";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, useUnmount } from "ahooks";
@@ -44,7 +43,6 @@ function MinimalistAvatar() {
   const { startVoiceChat } = useVoiceChat();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isConversationStarted, setIsConversationStarted] = useState(false);
 
   const mediaStream = useRef<HTMLVideoElement>(null);
 
@@ -68,7 +66,7 @@ function MinimalistAvatar() {
       
       const newToken = await fetchAccessToken();
       console.log("✅ Token de acceso obtenido");
-      
+
       const avatar = initAvatar(newToken);
 
       // Configurar eventos del avatar
@@ -92,8 +90,7 @@ function MinimalistAvatar() {
       // Iniciar chat de voz automáticamente
       console.log("Iniciando chat de voz...");
       await startVoiceChat();
-      
-      setIsConversationStarted(true);
+
       setIsLoading(false);
     } catch (error) {
       console.error("❌ Error iniciando sesión de avatar:", error);
@@ -105,7 +102,6 @@ function MinimalistAvatar() {
     try {
       console.log("=== CERRANDO SESIÓN DE AVATAR ===");
       await stopAvatar();
-      setIsConversationStarted(false);
       console.log("✅ Sesión cerrada exitosamente");
     } catch (error) {
       console.error("❌ Error cerrando sesión de avatar:", error);
@@ -133,10 +129,10 @@ function MinimalistAvatar() {
           <MinimalistAvatarVideo ref={mediaStream} />
         ) : (
           <div className="w-full h-full bg-zinc-900/10 rounded-lg flex items-center justify-center overflow-hidden">
-            <img 
-              src="/JUJO.png" 
-              alt="Avatar Preview" 
+            <img
+              alt="Avatar Preview"
               className="w-full h-full object-cover"
+              src="/JUJO.png"
             />
           </div>
         )}
@@ -145,9 +141,9 @@ function MinimalistAvatar() {
       {/* Botones de control */}
       <div className="flex justify-center">
         {sessionState === StreamingAvatarSessionState.INACTIVE && !isLoading ? (
-          <Button 
-            onClick={startConversation}
+          <Button
             className="px-8 py-3 text-lg font-medium"
+            onClick={startConversation}
           >
             Comenzar Chat
           </Button>
@@ -161,9 +157,9 @@ function MinimalistAvatar() {
             <div className="text-green-400 text-sm">
               ✓ Conversación activa
             </div>
-            <Button 
-              onClick={stopConversation}
+            <Button
               className="px-6 py-2 text-sm bg-red-600 hover:bg-red-700 flex items-center gap-2"
+              onClick={stopConversation}
             >
               <CloseIcon size={16} />
               Cerrar Sesión

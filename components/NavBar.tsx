@@ -10,7 +10,11 @@ export default function NavBar() {
       <div className="flex flex-row justify-between items-center w-[1000px] m-auto p-6">
         <div className="flex flex-row items-center gap-4">
           <Link href="https://www.mientrerios.gob.ar/" target="_blank">
-            <img src="/MiER-Cuadrado.png" alt="Mi Entre Rios" className="w-20 h-20" />
+            <img
+              alt="Mi Entre Rios"
+              className="w-20 h-20"
+              src="/MiER-Cuadrado.png"
+            />
           </Link>
           <div className="bg-gradient-to-br from-lime-300 to-lime-600 bg-clip-text">
             <p className="text-xl font-semibold text-transparent">
