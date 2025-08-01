@@ -13,7 +13,7 @@ import { Select } from "../Select";
 
 import { Field } from "./Field";
 
-import { AVATARS, STT_LANGUAGE_LIST } from "@/app/lib/constants";
+import { AVATARS, STT_LANGUAGE_LIST, ENV_IDS } from "@/app/lib/constants";
 
 interface AvatarConfigProps {
   onConfigChange: (config: StartAvatarRequest) => void;
@@ -54,48 +54,27 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
 
   return (
     <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
-      <Field label="Custom Knowledge Base ID">
+      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+        <p className="text-blue-300 text-sm text-center">
+          Using fixed configuration from environment variables
+        </p>
+      </div>
+      <Field label="Knowledge Base ID (Fixed)">
         <Input
-          placeholder="Enter custom knowledge base ID"
-          value={config.knowledgeId}
-          onChange={(value) => onChange("knowledgeId", value)}
+          placeholder="Knowledge Base ID"
+          value={ENV_IDS.KNOWLEDGE_ID}
+          disabled={true}
+          className="bg-zinc-800 text-zinc-400"
         />
       </Field>
-      <Field label="Avatar ID">
-        <Select
-          isSelected={(option) =>
-            typeof option === "string"
-              ? !!selectedAvatar?.isCustom
-              : option.avatar_id === selectedAvatar?.avatarId
-          }
-          options={[...AVATARS, "CUSTOM"]}
-          placeholder="Select Avatar"
-          renderOption={(option) => {
-            return typeof option === "string"
-              ? "Custom Avatar ID"
-              : option.name;
-          }}
-          value={
-            selectedAvatar?.isCustom ? "Custom Avatar ID" : selectedAvatar?.name
-          }
-          onSelect={(option) => {
-            if (typeof option === "string") {
-              onChange("avatarName", "");
-            } else {
-              onChange("avatarName", option.avatar_id);
-            }
-          }}
+      <Field label="Avatar ID (Fixed)">
+        <Input
+          placeholder="Avatar ID"
+          value={ENV_IDS.AVATAR_ID}
+          disabled={true}
+          className="bg-zinc-800 text-zinc-400"
         />
       </Field>
-      {selectedAvatar?.isCustom && (
-        <Field label="Custom Avatar ID">
-          <Input
-            placeholder="Enter custom avatar ID"
-            value={config.avatarName}
-            onChange={(value) => onChange("avatarName", value)}
-          />
-        </Field>
-      )}
       <Field label="Language">
         <Select
           isSelected={(option) => option.value === config.language}
@@ -131,13 +110,12 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
           <h1 className="text-zinc-100 w-full text-center mt-5">
             Voice Settings
           </h1>
-          <Field label="Custom Voice ID">
+          <Field label="Voice ID (Fixed)">
             <Input
-              placeholder="Enter custom voice ID"
-              value={config.voice?.voiceId}
-              onChange={(value) =>
-                onChange("voice", { ...config.voice, voiceId: value })
-              }
+              placeholder="Voice ID"
+              value={ENV_IDS.VOICE_ID}
+              disabled={true}
+              className="bg-zinc-800 text-zinc-400"
             />
           </Field>
           <Field label="Emotion">

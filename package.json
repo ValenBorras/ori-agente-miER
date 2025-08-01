@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx"
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "check-env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@heygen/streaming-avatar": "^2.0.13",

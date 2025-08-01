@@ -1,42 +1,93 @@
-# HeyGen Interactive Avatar NextJS Demo
+# HeyGen Interactive Avatar NextJS Demo - Versión Minimalista
 
 ![HeyGen Interactive Avatar NextJS Demo Screenshot](./public/demo.png)
 
-This is a sample project and was bootstrapped using [NextJS](https://nextjs.org/).
-Feel free to play around with the existing code and please leave any feedback for the SDK [here](https://github.com/HeyGen-Official/StreamingAvatarSDK/discussions).
+Esta es una demo minimalista del avatar interactivo de HeyGen con configuración fija en español. El proyecto está construido usando [NextJS](https://nextjs.org/).
 
-## Getting Started FAQ
+## Características de la Demo Minimalista
 
-### Setting up the demo
+- ✅ Imagen JUJO.png visible como preview del avatar al cargar la página
+- ✅ Un solo botón "Comenzar Chat" 
+- ✅ Botón "Cerrar Sesión" cuando la conversación está activa
+- ✅ Idioma fijo en español (sin opciones de cambio)
+- ✅ Velocidad de habla x1 (normal) configurada por defecto
+- ✅ Conversación automática al hacer clic en el botón
+- ✅ Diseño minimalista con imagen de fondo gobER-expandida.webp
+- ✅ Contenedor compacto y centrado
 
-1. Clone this repo
+## Configuración Inicial
 
-2. Navigate to the repo folder in your terminal
+### 1. Clonar el repositorio
 
-3. Run `npm install` (assuming you have npm installed. If not, please follow these instructions: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/)
+```bash
+git clone <repository-url>
+cd InteractiveAvatarNextJSDemo
+```
 
-4. Enter your HeyGen Enterprise API Token in the `.env` file. Replace `HEYGEN_API_KEY` with your API key. This will allow the Client app to generate secure Access Tokens with which to create interactive sessions.
+### 2. Instalar dependencias
 
-   You can retrieve either the API Key by logging in to HeyGen and navigating to this page in your settings: [https://app.heygen.com/settings?from=&nav=Subscriptions%20%26%20API]. 
+```bash
+npm install
+```
 
-5. (Optional) If you would like to use the OpenAI features, enter your OpenAI Api Key in the `.env` file.
+### 3. Configurar variables de entorno
 
-6. Run `npm run dev`
+Crea un archivo `.env` en la raíz del proyecto basándote en `env.example`:
 
-### Starting sessions
+```bash
+cp env.example .env
+```
 
-NOTE: Make sure you have enter your token into the `.env` file and run `npm run dev`.
+Edita el archivo `.env` y agrega tu API key de HeyGen:
 
-To start your 'session' with a Interactive Avatar, first click the 'start' button. If your HeyGen API key is entered into the Server's .env file, then you should see our demo Interactive Avatar appear.
+```env
+HEYGEN_API_KEY=tu_api_key_de_heygen_aqui
+```
 
-If you want to see a different Avatar or try a different voice, you can close the session and enter the IDs and then 'start' the session again. Please see below for information on where to retrieve different Avatar and voice IDs that you can use.
+**¿Dónde obtener tu API Key?**
+- Ve a [https://app.heygen.com/settings?from=&nav=Subscriptions%20%26%20API](https://app.heygen.com/settings?from=&nav=Subscriptions%20%26%20API)
+- Copia tu API Key de HeyGen Enterprise
 
-### Which Avatars can I use with this project?
+### 4. Ejecutar la aplicación
 
-By default, there are several Public Avatars that can be used in Interactive Avatar. (AKA Interactive Avatars.) You can find the Avatar IDs for these Public Avatars by navigating to [labs.heygen.com/interactive-avatar](https://labs.heygen.com/interactive-avatar) and clicking 'Select Avatar' and copying the avatar id.
+```bash
+npm run dev
+```
 
-You can create your own custom Interactive Avatars at labs.heygen.com/interactive-avatar by clicking 'create interactive avatar' on the top-left of the screen.
+La aplicación estará disponible en `http://localhost:3000` (o el puerto que Next.js asigne automáticamente)
 
-### Where can I read more about enterprise-level usage of the Interactive Avatar API?
+## Uso de la Demo
 
-Please read our Interactive Avatar 101 article for more information on pricing: https://help.heygen.com/en/articles/9182113-interactive-avatar-101-your-ultimate-guide
+1. **Al cargar la página**: Verás la imagen JUJO.png como preview del avatar
+2. **Hacer clic en "Comenzar Chat"**: Se iniciará automáticamente la conversación en español
+3. **Durante la conversación**: El avatar responderá y hablará en español a velocidad normal
+4. **Para terminar**: Haz clic en "Cerrar Sesión" para finalizar la conversación
+
+## Configuración Avanzada (Opcional)
+
+Si quieres personalizar el avatar, voz o conocimiento base, puedes agregar estas variables al archivo `.env`:
+
+```env
+# IDs personalizados (opcionales)
+AVATAR=tu_avatar_id_aqui
+VOICE=tu_voice_id_aqui  
+KNOWLEDGE=tu_knowledge_id_aqui
+```
+
+**¿Dónde encontrar estos IDs?**
+- Ve a [https://labs.heygen.com/interactive-avatar](https://labs.heygen.com/interactive-avatar)
+- Selecciona "Select Avatar" para ver los avatares públicos disponibles
+- O crea tu propio avatar interactivo con "Create Interactive Avatar"
+
+## Tecnologías Utilizadas
+
+- **Next.js 15** - Framework de React
+- **@heygen/streaming-avatar** - SDK oficial de HeyGen
+- **TypeScript** - Tipado estático
+- **Tailwind CSS** - Estilos y diseño
+
+## Recursos Adicionales
+
+- [Documentación del SDK de HeyGen](https://docs.heygen.com/reference/streaming-avatar-sdk)
+- [Interactive Avatar 101](https://help.heygen.com/en/articles/9182113-interactive-avatar-101-your-ultimate-guide) - Guía completa sobre avatares interactivos
+- [Discusiones del SDK](https://github.com/HeyGen-Official/StreamingAvatarSDK/discussions) - Soporte y feedback

@@ -20,13 +20,14 @@ import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
 
-import { AVATARS } from "@/app/lib/constants";
+import { AVATARS, ENV_IDS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
-  avatarName: AVATARS[0].avatar_id,
-  knowledgeId: undefined,
+  avatarName: ENV_IDS.AVATAR_ID,
+  knowledgeId: ENV_IDS.KNOWLEDGE_ID,
   voice: {
+    voiceId: ENV_IDS.VOICE_ID,
     rate: 1.5,
     emotion: VoiceEmotion.EXCITED,
     model: ElevenLabsModel.eleven_flash_v2_5,
@@ -44,6 +45,10 @@ function InteractiveAvatar() {
   const { startVoiceChat } = useVoiceChat();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
+
+  // Log the configuration to verify environment variables are loaded
+  console.log("Using default avatar configuration");
+  console.log("Current config:", config);
 
   const mediaStream = useRef<HTMLVideoElement>(null);
 
@@ -65,7 +70,12 @@ function InteractiveAvatar() {
 
   const startSessionV2 = useMemoizedFn(async (isVoiceChat: boolean) => {
     try {
+      console.log("=== STARTING AVATAR SESSION ===");
+      console.log("Using default config:", JSON.stringify(config, null, 2));
+      
       const newToken = await fetchAccessToken();
+      console.log("✅ Got access token successfully");
+      console.log("Got access token, initializing avatar...");
       const avatar = initAvatar(newToken);
 
       avatar.on(StreamingEvents.AVATAR_START_TALKING, (e) => {
@@ -99,13 +109,20 @@ function InteractiveAvatar() {
         console.log(">>>>> Avatar end message:", event);
       });
 
+      console.log("Starting avatar with config:", JSON.stringify(config, null, 2));
       await startAvatar(config);
+      console.log("✅ Avatar started successfully");
 
       if (isVoiceChat) {
+        console.log("Starting voice chat...");
         await startVoiceChat();
       }
     } catch (error) {
-      console.error("Error starting avatar session:", error);
+      console.error("❌ Error starting avatar session:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+        console.error("Error stack:", error.stack);
+      }
     }
   });
 
