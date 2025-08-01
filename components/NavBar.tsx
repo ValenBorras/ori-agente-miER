@@ -7,13 +7,13 @@ import { GithubIcon } from "./Icons";
 export default function NavBar() {
   return (
     <>
-      <div className="flex flex-row justify-between items-center w-[1000px] m-auto p-6">
+      <div className="flex flex-row justify-between items-center w-[1000px] m-auto p-4">
         <div className="flex flex-row items-center gap-4">
           <Link href="https://www.mientrerios.gob.ar/" target="_blank">
             <img
               alt="Mi Entre Rios"
-              className="w-20 h-20"
-              src="/MiER-Cuadrado.png"
+              className="w-25 h-20"
+              src="/MiER-Cuadrado.svg"
             />
           </Link>
           <div className="bg-gradient-to-br from-lime-300 to-lime-600 bg-clip-text">

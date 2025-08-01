@@ -154,9 +154,7 @@ function MinimalistAvatar() {
           </div>
         ) : sessionState === StreamingAvatarSessionState.CONNECTED ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="text-green-400 text-sm">
-              ✓ Conversación activa
-            </div>
+            <div className="text-green-400 text-sm">✓ Conversación activa</div>
             <Button
               className="px-6 py-2 text-sm bg-red-600 hover:bg-red-700 flex items-center gap-2"
               onClick={stopConversation}
@@ -166,9 +164,7 @@ function MinimalistAvatar() {
             </Button>
           </div>
         ) : (
-          <div className="text-yellow-400 text-sm">
-            Inicializando...
-          </div>
+          <div className="text-yellow-400 text-sm">Inicializando...</div>
         )}
       </div>
     </div>

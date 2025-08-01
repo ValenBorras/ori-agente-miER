@@ -1,7 +1,6 @@
 import React, { forwardRef } from "react";
 
-export const MinimalistAvatarVideo = forwardRef<HTMLVideoElement>(
-  ({}, ref) => {
+export const MinimalistAvatarVideo = forwardRef<HTMLVideoElement>(({}, ref) => {
   return (
     <video
       ref={ref}
