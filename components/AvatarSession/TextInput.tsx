@@ -1,3 +1,5 @@
+"use client";
+
 import { TaskType, TaskMode } from "@heygen/streaming-avatar";
 import React, { useCallback, useEffect, useState } from "react";
 import { usePrevious } from "ahooks";

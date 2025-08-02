@@ -13,8 +13,8 @@ export default function Footer() {
             className="mx-auto"
           />
         </div>
-        <p className="text-sm">
-          © Gobierno de Entre Ríos 2025
+        <p className="text-sm my-4">
+          © Gobierno de Entre Ríos 2025 | AI Dept. Pathfinding S.A. - valentina.borras@pathfinding.com.ar
         </p>
       </div>
     </footer>
