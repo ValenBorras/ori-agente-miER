@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import MinimalistAvatarWrapper from '../../components/MinimalistAvatar';
 
 export default function ChromaDemo() {

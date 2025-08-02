@@ -6,6 +6,7 @@ import {
   StartAvatarRequest,
   STTProvider,
   ElevenLabsModel,
+  TaskType,
 } from "@heygen/streaming-avatar";
 import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, useUnmount } from "ahooks";
@@ -20,7 +21,7 @@ import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
 
-import { AVATARS, ENV_IDS } from "@/app/lib/constants";
+import { ENV_IDS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
@@ -87,8 +88,31 @@ function InteractiveAvatar() {
       avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
         console.log("Stream disconnected");
       });
-      avatar.on(StreamingEvents.STREAM_READY, (event) => {
+      avatar.on(StreamingEvents.STREAM_READY, async (event) => {
         console.log(">>>>> Stream ready:", event.detail);
+        
+        // Trigger the opening intro using knowledge base
+        setTimeout(async () => {
+          try {
+            console.log("Activating knowledge base intro...");
+            await avatar.speak({
+              text: "Hello", // Simple trigger
+              task_type: TaskType.TALK
+            });
+          } catch (error) {
+            console.error("Error activating intro:", error);
+            // Fallback: try empty TALK task
+            try {
+              console.log("Trying alternative method with empty text...");
+              await avatar.speak({
+                text: "", // Empty text
+                task_type: TaskType.TALK
+              });
+            } catch (fallbackError) {
+              console.error("Error in alternative method:", fallbackError);
+            }
+          }
+        }, 1000); // Small delay to ensure stream is fully ready
       });
       avatar.on(StreamingEvents.USER_START, (event) => {
         console.log(">>>>> User started talking:", event);

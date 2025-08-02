@@ -6,6 +6,7 @@ import {
   StartAvatarRequest,
   STTProvider,
   ElevenLabsModel,
+  TaskType,
 } from "@heygen/streaming-avatar";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useMemoizedFn, useUnmount } from "ahooks";
@@ -16,7 +17,7 @@ import { ChromaKeyAvatar } from "./ChromaKeyAvatar";
 import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
 import { useVoiceChat } from "./logic/useVoiceChat";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
-import { LoadingIcon, CloseIcon } from "./Icons";
+import { LoadingIcon } from "./Icons";
 
 import { ENV_IDS } from "@/app/lib/constants";
 
@@ -25,6 +26,7 @@ const FIXED_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.High,
   avatarName: ENV_IDS.AVATAR_ID,
   knowledgeId: ENV_IDS.KNOWLEDGE_ID,
+  knowledgeBase: `Eres JUJO, un asistente virtual amigable y útil. Cuando te saluden o te pregunten quién eres, siempre comienza presentándote de manera cálida y amigable. Habla en español de manera natural y conversacional.`,
   voice: {
     voiceId: ENV_IDS.VOICE_ID,
     rate: 1.0, // Velocidad x1 (normal)
@@ -201,7 +203,7 @@ function SimpleAudioSensor({
 }
 
 function MinimalistAvatar() {
-  const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
+  const { initAvatar, startAvatar, stopAvatar, sessionState, stream: _stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
 
@@ -242,8 +244,31 @@ function MinimalistAvatar() {
       avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
         console.log("Stream desconectado");
       });
-      avatar.on(StreamingEvents.STREAM_READY, (event) => {
+      avatar.on(StreamingEvents.STREAM_READY, async (event) => {
         console.log("Stream listo:", event.detail);
+        
+        // Trigger the opening intro using knowledge base
+        setTimeout(async () => {
+          try {
+            console.log("Activando intro del knowledge base...");
+            await avatar.speak({
+              text: "Hola", // Simple trigger
+              task_type: TaskType.TALK
+            });
+          } catch (error) {
+            console.error("Error activando intro:", error);
+            // Fallback: try empty TALK task
+            try {
+              console.log("Intentando método alternativo con texto vacío...");
+              await avatar.speak({
+                text: "", // Empty text
+                task_type: TaskType.TALK
+              });
+            } catch (fallbackError) {
+              console.error("Error en método alternativo:", fallbackError);
+            }
+          }
+        }, 1000); // Small delay to ensure stream is fully ready
       });
 
       // Iniciar avatar con configuración fija
@@ -310,13 +335,13 @@ function MinimalistAvatar() {
               <ChromaKeyAvatar
                 ref={mediaStream}
                 sessionState={sessionState}
-                stream={stream}
+                stream={_stream}
                 onStreamReady={handleStreamReady}
                 onStreamDisconnected={handleStreamDisconnected}
                 className="rounded-lg"
               />
             ) : (
-              <div className="w-full h-full bg-zinc-900/10 rounded-lg flex items-center justify-center overflow-hidden">
+              <div className="w-full h-full  rounded-lg flex items-center justify-center overflow-hidden">
                 <img
                   alt="Avatar Preview"
                   className="w-full h-full object-contain"

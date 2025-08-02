@@ -20,8 +20,7 @@ interface UseMicrophoneReturn {
 export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophoneReturn {
   const {
     sensitivity = 5,
-    fftSize = 256,
-    updateFrequency = 60
+    fftSize = 256
   } = options;
 
   const [isListening, setIsListening] = useState(false);

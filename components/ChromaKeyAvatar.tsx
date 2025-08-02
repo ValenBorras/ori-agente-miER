@@ -5,8 +5,7 @@ import React, {
   useRef, 
   useEffect, 
   useState, 
-  useCallback, 
-  useMemo 
+  useCallback 
 } from 'react';
 import { ChromaKeyAvatarProps, ChromaKeyProcessorState } from '../types/chromaKey';
 import { 
@@ -17,7 +16,7 @@ import {
 
 export const ChromaKeyAvatar = forwardRef<HTMLVideoElement, ChromaKeyAvatarProps>(
   ({ 
-    sessionState, 
+    sessionState: _sessionState, 
     stream, 
     onStreamReady, 
     onStreamDisconnected, 
@@ -195,7 +194,7 @@ export const ChromaKeyAvatar = forwardRef<HTMLVideoElement, ChromaKeyAvatarProps
         
         {/* Loading overlay */}
         {chromaEnabled && !processorState.isProcessing && !processorState.error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-sm">Conectando con JUJO...</div>
           </div>
         )}

@@ -34,26 +34,6 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
   };
   const [showMore, setShowMore] = useState<boolean>(false);
 
-  const selectedAvatar = useMemo(() => {
-    const avatar = AVATARS.find(
-      (avatar) => avatar.avatar_id === config.avatarName,
-    );
-
-    if (!avatar) {
-      return {
-        isCustom: true,
-        name: "Custom Avatar ID",
-        avatarId: null,
-      };
-    } else {
-      return {
-        isCustom: false,
-        name: avatar.name,
-        avatarId: avatar.avatar_id,
-      };
-    }
-  }, [config.avatarName]);
-
   return (
     <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
       <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
