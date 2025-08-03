@@ -24,13 +24,13 @@ import { MessageHistory } from "./AvatarSession/MessageHistory";
 import { ENV_IDS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
-  quality: AvatarQuality.Low,
+  quality: AvatarQuality.High,
   avatarName: ENV_IDS.AVATAR_ID,
   knowledgeId: ENV_IDS.KNOWLEDGE_ID,
   voice: {
     voiceId: ENV_IDS.VOICE_ID,
-    rate: 1.5,
-    emotion: VoiceEmotion.EXCITED,
+    rate: 1.0,
+    emotion: VoiceEmotion.FRIENDLY,
     model: ElevenLabsModel.eleven_flash_v2_5,
   },
   language: "en",

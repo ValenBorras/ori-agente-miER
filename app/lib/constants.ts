@@ -59,4 +59,6 @@ export const ENV_IDS = {
     process.env.NEXT_PUBLIC_AVATAR || "8f059ad755ff4e62b103f2e3b2f127af",
   VOICE_ID:
     process.env.NEXT_PUBLIC_VOICE || "cddb6172a34a4f83ae225892c4219d31",
+  INTRODUCTION:
+    process.env.NEXT_PUBLIC_INTRODUCTION || "Hola! soy JUJO, asistente virtual del gobierno de Entre Rios, en que te puedo ayudar?",
 };

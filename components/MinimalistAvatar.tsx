@@ -26,11 +26,10 @@ const FIXED_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.High,
   avatarName: ENV_IDS.AVATAR_ID,
   knowledgeId: ENV_IDS.KNOWLEDGE_ID,
-  knowledgeBase: `Eres JUJO, un asistente virtual amigable y útil. Cuando te saluden o te pregunten quién eres, siempre comienza presentándote de manera cálida y amigable. Habla en español de manera natural y conversacional.`,
   voice: {
     voiceId: ENV_IDS.VOICE_ID,
-    rate: 1.0, // Velocidad x1 (normal)
-    emotion: VoiceEmotion.FRIENDLY,
+    rate: 1.10, // Velocidad x1 (normal)
+    emotion: VoiceEmotion.EXCITED,
     model: ElevenLabsModel.eleven_flash_v2_5,
   },
   language: "es", // Idioma fijo en español
@@ -252,8 +251,8 @@ function MinimalistAvatar() {
           try {
             console.log("Activando intro del knowledge base...");
             await avatar.speak({
-              text: "Hola", // Simple trigger
-              task_type: TaskType.TALK
+              text: ENV_IDS.INTRODUCTION,
+              task_type: TaskType.REPEAT
             });
           } catch (error) {
             console.error("Error activando intro:", error);
@@ -261,7 +260,7 @@ function MinimalistAvatar() {
             try {
               console.log("Intentando método alternativo con texto vacío...");
               await avatar.speak({
-                text: "", // Empty text
+                text: "",
                 task_type: TaskType.TALK
               });
             } catch (fallbackError) {
