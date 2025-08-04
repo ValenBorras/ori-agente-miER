@@ -1,0 +1,670 @@
+---
+alwaysApply: true
+---
+RESOURCES
+Libraries
+WebSocket
+
+Copy page
+
+Create real-time, interactive voice conversations with AI agents
+
+This documentation is for developers integrating directly with the ElevenLabs WebSocket API. For convenience, consider using the official SDKs provided by ElevenLabs.
+
+The ElevenLabs Conversational AI WebSocket API enables real-time, interactive voice conversations with AI agents. By establishing a WebSocket connection, you can send audio input and receive audio responses in real-time, creating life-like conversational experiences.
+
+Endpoint: wss://api.elevenlabs.io/v1/convai/conversation?agent_id={agent_id}
+Authentication
+Using Agent ID
+For public agents, you can directly use the agent_id in the WebSocket URL without additional authentication:
+
+wss://api.elevenlabs.io/v1/convai/conversation?agent_id=<your-agent-id>
+
+Using a signed URL
+For private agents or conversations requiring authorization, obtain a signed URL from your server, which securely communicates with the ElevenLabs API using your API key.
+
+Example using cURL
+Request:
+
+curl -X GET "https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=<your-agent-id>" \
+     -H "xi-api-key: <your-api-key>"
+
+Response:
+
+{
+  "signed_url": "wss://api.elevenlabs.io/v1/convai/conversation?agent_id=<your-agent-id>&token=<token>"
+}
+
+Never expose your ElevenLabs API key on the client side.
+WebSocket events
+Client to server events
+The following events can be sent from the client to the server:
+
+Contextual Updates
+WebSocket API Reference
+See the Conversational AI WebSocket API reference documentation for detailed message structures, parameters, and examples.
+
+Next.js implementation example
+This example demonstrates how to implement a WebSocket-based conversational AI client in Next.js using the ElevenLabs WebSocket API.
+
+While this example uses the voice-stream package for microphone input handling, you can implement your own solution for capturing and encoding audio. The focus here is on demonstrating the WebSocket connection and event handling with the ElevenLabs API.
+
+1
+Install required dependencies
+First, install the necessary packages:
+
+npm install voice-stream
+
+The voice-stream package handles microphone access and audio streaming, automatically encoding the audio in base64 format as required by the ElevenLabs API.
+
+This example uses Tailwind CSS for styling. To add Tailwind to your Next.js project:
+
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+Then follow the official Tailwind CSS setup guide for Next.js.
+
+Alternatively, you can replace the className attributes with your own CSS styles.
+
+2
+Create WebSocket types
+Define the types for WebSocket events:
+
+app/types/websocket.ts
+
+type BaseEvent = {
+  type: string;
+};
+type UserTranscriptEvent = BaseEvent & {
+  type: "user_transcript";
+  user_transcription_event: {
+    user_transcript: string;
+  };
+};
+type AgentResponseEvent = BaseEvent & {
+  type: "agent_response";
+  agent_response_event: {
+    agent_response: string;
+  };
+};
+type AudioResponseEvent = BaseEvent & {
+  type: "audio";
+  audio_event: {
+    audio_base_64: string;
+    event_id: number;
+  };
+};
+type InterruptionEvent = BaseEvent & {
+  type: "interruption";
+  interruption_event: {
+    reason: string;
+  };
+};
+type PingEvent = BaseEvent & {
+  type: "ping";
+  ping_event: {
+    event_id: number;
+    ping_ms?: number;
+  };
+};
+export type ElevenLabsWebSocketEvent =
+  | UserTranscriptEvent
+  | AgentResponseEvent
+  | AudioResponseEvent
+  | InterruptionEvent
+  | PingEvent;
+3
+Create WebSocket hook
+Create a custom hook to manage the WebSocket connection:
+
+app/hooks/useAgentConversation.ts
+
+'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useVoiceStream } from 'voice-stream';
+import type { ElevenLabsWebSocketEvent } from '../types/websocket';
+const sendMessage = (websocket: WebSocket, request: object) => {
+  if (websocket.readyState !== WebSocket.OPEN) {
+    return;
+  }
+  websocket.send(JSON.stringify(request));
+};
+export const useAgentConversation = () => {
+  const websocketRef = useRef<WebSocket>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const { startStreaming, stopStreaming } = useVoiceStream({
+    onAudioChunked: (audioData) => {
+      if (!websocketRef.current) return;
+      sendMessage(websocketRef.current, {
+        user_audio_chunk: audioData,
+      });
+    },
+  });
+  const startConversation = useCallback(async () => {
+    if (isConnected) return;
+    const websocket = new WebSocket("wss://api.elevenlabs.io/v1/convai/conversation");
+    websocket.onopen = async () => {
+      setIsConnected(true);
+      sendMessage(websocket, {
+        type: "conversation_initiation_client_data",
+      });
+      await startStreaming();
+    };
+    websocket.onmessage = async (event) => {
+      const data = JSON.parse(event.data) as ElevenLabsWebSocketEvent;
+      // Handle ping events to keep connection alive
+      if (data.type === "ping") {
+        setTimeout(() => {
+          sendMessage(websocket, {
+            type: "pong",
+            event_id: data.ping_event.event_id,
+          });
+        }, data.ping_event.ping_ms);
+      }
+      if (data.type === "user_transcript") {
+        const { user_transcription_event } = data;
+        console.log("User transcript", user_transcription_event.user_transcript);
+      }
+      if (data.type === "agent_response") {
+        const { agent_response_event } = data;
+        console.log("Agent response", agent_response_event.agent_response);
+      }
+      if (data.type === "interruption") {
+        // Handle interruption
+      }
+      if (data.type === "audio") {
+        const { audio_event } = data;
+        // Implement your own audio playback system here
+        // Note: You'll need to handle audio queuing to prevent overlapping
+        // as the WebSocket sends audio events in chunks
+      }
+    };
+    websocketRef.current = websocket;
+    websocket.onclose = async () => {
+      websocketRef.current = null;
+      setIsConnected(false);
+      stopStreaming();
+    };
+  }, [startStreaming, isConnected, stopStreaming]);
+  const stopConversation = useCallback(async () => {
+    if (!websocketRef.current) return;
+    websocketRef.current.close();
+  }, []);
+  useEffect(() => {
+    return () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+  }, []);
+  return {
+    startConversation,
+    stopConversation,
+    isConnected,
+  };
+};
+4
+Create the conversation component
+Create a component to use the WebSocket hook:
+
+app/components/Conversation.tsx
+
+'use client';
+import { useCallback } from 'react';
+import { useAgentConversation } from '../hooks/useAgentConversation';
+export function Conversation() {
+  const { startConversation, stopConversation, isConnected } = useAgentConversation();
+  const handleStart = useCallback(async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await startConversation();
+    } catch (error) {
+      console.error('Failed to start conversation:', error);
+    }
+  }, [startConversation]);
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex gap-2">
+        <button
+          onClick={handleStart}
+          disabled={isConnected}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+        >
+          Start Conversation
+        </button>
+        <button
+          onClick={stopConversation}
+          disabled={!isConnected}
+          className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
+        >
+          Stop Conversation
+        </button>
+      </div>
+      <div className="flex flex-col items-center">
+        <p>Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
+      </div>
+    </div>
+  );
+}
+Next steps
+Audio Playback: Implement your own audio playback system using Web Audio API or a library. Remember to handle audio queuing to prevent overlapping as the WebSocket sends audio events in chunks.
+Error Handling: Add retry logic and error recovery mechanisms
+UI Feedback: Add visual indicators for voice activity and connection status
+Latency management
+To ensure smooth conversations, implement these strategies:
+
+Adaptive Buffering: Adjust audio buffering based on network conditions.
+Jitter Buffer: Implement a jitter buffer to smooth out variations in packet arrival times.
+Ping-Pong Monitoring: Use ping and pong events to measure round-trip time and adjust accordingly.
+Security best practices
+Rotate API keys regularly and use environment variables to store them.
+Implement rate limiting to prevent abuse.
+Clearly explain the intention when prompting users for microphone access.
+Optimized Chunking: Tweak the audio chunk duration to balance latency and efficiency.
+Additional resources
+ElevenLabs Conversational AI Documentation
+ElevenLabs Conversational AI SDKs
+
+React SDK
+
+Copy page
+
+Conversational AI SDK: deploy customized, interactive voice agents in minutes.
+
+Refer to the Conversational AI overview for an explanation of how Conversational AI works.
+
+Installation
+Install the package in your project through package manager.
+
+npm install @elevenlabs/react
+# or
+yarn add @elevenlabs/react
+# or
+pnpm install @elevenlabs/react
+
+Usage
+useConversation
+A React hook for managing connection and audio usage for ElevenLabs Conversational AI.
+
+Initialize conversation
+First, initialize the Conversation instance.
+
+import { useConversation } from '@elevenlabs/react';
+const conversation = useConversation();
+
+Note that Conversational AI requires microphone access. Consider explaining and allowing access in your app’s UI before the Conversation starts.
+
+// call after explaining to the user why the microphone access is needed
+await navigator.mediaDevices.getUserMedia({ audio: true });
+
+Options
+The Conversation can be initialized with certain options
+
+const conversation = useConversation({
+  /* options object */
+});
+
+onConnect - handler called when the conversation websocket connection is established.
+onDisconnect - handler called when the conversation websocket connection is ended.
+onMessage - handler called when a new message is received. These can be tentative or final transcriptions of user voice, replies produced by LLM, or debug message when a debug option is enabled.
+onError - handler called when a error is encountered.
+Methods
+startSession
+The startConversation method kicks off the WebSocket or WebRTC connection and starts using the microphone to communicate with the ElevenLabs Conversational AI agent. The method accepts an options object, with the signedUrl, conversationToken or agentId option being required.
+
+The Agent ID can be acquired through ElevenLabs UI.
+
+We also recommended passing in your own end user IDs to map conversations to your users.
+
+const conversation = useConversation();
+// For public agents, pass in the agent ID and the connection type
+const conversationId = await conversation.startSession({
+  agentId: '<your-agent-id>',
+  connectionType: 'webrtc', // either "webrtc" or "websocket"
+  user_id: '<your-end-user-id>', // optional field
+});
+
+For public agents (i.e. agents that don’t have authentication enabled), only the agentId is required.
+
+In case the conversation requires authorization, use the REST API to generate signed links for a WebSocket connection or a conversation token for a WebRTC connection.
+
+startSession returns a promise resolving a conversationId. The value is a globally unique conversation ID you can use to identify separate conversations.
+
+WebSocket connection
+WebRTC connection
+// Node.js server
+app.get("/signed-url", yourAuthMiddleware, async (req, res) => {
+  const response = await fetch(
+    `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${process.env.AGENT_ID}`,
+    {
+      headers: {
+        // Requesting a signed url requires your ElevenLabs API key
+        // Do NOT expose your API key to the client!
+        "xi-api-key": process.env.ELEVENLABS_API_KEY,
+      },
+    }
+  );
+  if (!response.ok) {
+    return res.status(500).send("Failed to get signed URL");
+  }
+  const body = await response.json();
+  res.send(body.signed_url);
+});
+
+// Client
+const response = await fetch("/signed-url", yourAuthHeaders);
+const signedUrl = await response.text();
+const conversation = await Conversation.startSession({
+  signedUrl,
+  connectionType: "websocket",
+});
+
+endSession
+A method to manually end the conversation. The method will disconnect and end the conversation.
+
+await conversation.endSession();
+
+setVolume
+Sets the output volume of the conversation. Accepts an object with a volume field between 0 and 1.
+
+await conversation.setVolume({ volume: 0.5 });
+
+status
+A React state containing the current status of the conversation.
+
+const { status } = useConversation();
+console.log(status); // "connected" or "disconnected"
+
+isSpeaking
+A React state containing information on whether the agent is currently speaking. This is useful for indicating agent status in your UI.
+
+const { isSpeaking } = useConversation();
+console.log(isSpeaking); // boolean
+
+What is Conversational AI?
+ElevenLabs Conversational AI is a platform for deploying customized, conversational voice agents. Built in response to our customers’ needs, our platform eliminates months of development time typically spent building conversation stacks from scratch. It combines these building blocks:
+
+Speech to text
+Our fine tuned ASR model that transcribes the caller’s dialogue.
+
+Language model
+Choose from Gemini, Claude, OpenAI and more, or bring your own.
+
+Text to speech
+Our low latency, human-like TTS across 5k+ voices and 31 languages.
+
+Turn taking model
+Our custom turn taking model that understands when to speak, like a human would.
+
+Altogether it is a highly composable AI Voice agent solution that can scale to thousands of calls per day. With server & client side tools, knowledge bases, dynamic agent instantiation and overrides, plus built-in monitoring, it’s the complete developer toolkit.
+
+Pricing
+15 minutes to get started on the free plan. Get 13,750 minutes included on the Business plan at $0.08 per minute on the Business plan, with extra minutes billed at $0.08, as well as significantly discounted pricing at higher volumes.
+
+
+Setup & Prompt Testing: billed at half the cost.
+
+Usage is billed to the account that created the agent. If authentication is not enabled, anybody with your agent’s id can connect to it and consume your credits. To protect against this, either enable authentication for your agent or handle the agent id as a secret.
+
+Pricing tiers
+In Minutes
+In Credits
+Tier	Price	Minutes included	Cost per extra minute
+Free	$0	15	Unavailable
+Starter	$5	50	Unavailable
+Creator	$22	250	~$0.12
+Pro	$99	1100	~$0.11
+Scale	$330	3,600	~$0.10
+Business	$1,320	13,750	$0.08 (annual), $0.096 (monthly)
+In multimodal text + voice mode, text message pricing per message. LLM costs are passed through separately, see here for estimates of LLM cost.
+
+Plan	Price per text message
+Free	0.4 cents
+Starter	0.4 cents
+Creator	0.3 cents
+Pro	0.3 cents
+Scale	0.3 cents
+Business	0.3 cents
+Enterprise	Custom pricing
+Pricing during silent periods
+When a conversation is silent for longer than ten seconds, ElevenLabs reduces the inference of the turn-taking model and speech-to-text services until voice activity is detected again. This optimization means that extended periods of silence are charged at 5% of the usual per-minute cost.
+
+This reduction in cost:
+
+Only applies to the period of silence.
+Does not apply after voice activity is detected again.
+Can be triggered at multiple times in the same conversation.
+Models
+Currently, the following models are natively supported and can be configured via the agent settings:
+
+Provider	Model
+Google	Gemini 2.5 Flash
+Gemini 2.0 Flash
+Gemini 2.0 Flash Lite
+Gemini 1.5 Flash
+Gemini 1.5 Pro
+OpenAI	GPT-4.1
+GPT-4.1 Mini
+GPT-4.1 Nano
+GPT-4o
+GPT-4o Mini
+GPT-4 Turbo
+GPT-4
+GPT-3.5 Turbo
+Anthropic	Claude Sonnet 4
+Claude 3.5 Sonnet
+Claude 3.5 Sonnet v1
+Claude 3.7 Sonnet
+Claude 3.0 Haiku
+Using your own Custom LLM is also supported by specifying the endpoint we should make requests to and providing credentials through our secure secret storage.
+
+With EU data residency enabled, a small number of older Gemini and Claude LLMs are not available in Conversational AI to maintain compliance with EU data residency. Custom LLMs and OpenAI LLMs remain fully available. For more infomation please see GDPR and data residency.
+
+Supported models
+
+You can start with our free tier, which includes 15 minutes of conversation per month.
+
+Need more? Upgrade to a paid plan instantly - no sales calls required. For enterprise usage (6+ hours of daily conversation), contact our sales team for custom pricing tailored to your needs.
+
+Popular applications
+Companies and creators use our Conversational AI orchestration platform to create:
+
+Customer service: Assistants trained on company documentation that can handle customer queries, troubleshoot issues, and provide 24/7 support in multiple languages.
+Virtual assistants: Assistants trained to manage scheduling, set reminders, look up information, and help users stay organized throughout their day.
+Retail support: Assistants that help customers find products, provide personalized recommendations, track orders, and answer product-specific questions.
+Personalized learning: Assistants that help students learn new topics & enhance reading comprehension by speaking with books and articles.
+Multi-character storytelling: Interactive narratives with distinct voices for different characters, powered by our new multi-voice support feature.
+
+API REFERENCE
+Agent WebSockets
+WSS
+
+https://wss//api.elevenlabs.io
+/v1/convai/conversation
+Handshake
+URL	https://wss//api.elevenlabs.io/v1/convai/conversation
+Method	GET
+Status	101 Switching Protocols
+Try it
+Messages
+
+{"type":"conversation_initiation_client_data","conversation_config_override":{"agent":{"prompt":{"prompt":"You are a helpful customer support agent named Alexis."},"first_message":"Hi, I'm Alexis from ElevenLabs support. How can I help you today?","language":"en"},"tts":{"voice_id":"21m00Tcm4TlvDq8ikWAM"}},"custom_llm_extra_body":{"temperature":0.7,"max_tokens":150},"dynamic_variables":{"user_name":"John","account_type":"premium"}}
+publish
+
+
+{"type":"conversation_initiation_metadata","conversation_initiation_metadata_event":{"conversation_id":"conv_123456789","agent_output_audio_format":"pcm_16000","user_input_audio_format":"pcm_16000"}}
+subscribe
+
+
+{"user_audio_chunk":"base64EncodedAudioData=="}
+publish
+
+
+{"type":"vad_score","vad_score_event":{"vad_score":0.95}}
+subscribe
+
+
+{"type":"user_transcript","user_transcription_event":{"user_transcript":"I need help with my voice cloning project."}}
+subscribe
+
+
+{"type":"internal_tentative_agent_response","tentative_agent_response_internal_event":{"tentative_agent_response":"I'd be happy to help with your voice cloning project..."}}
+subscribe
+
+
+{"type":"agent_response","agent_response_event":{"agent_response":"I'd be happy to help with your voice cloning project. Could you tell me what specific aspects you need assistance with?"}}
+subscribe
+
+
+{"type":"audio","audio_event":{"audio_base_64":"base64EncodedAudioResponse==","event_id":1}}
+subscribe
+
+
+{"type":"ping","ping_event":{"event_id":12345,"ping_ms":50}}
+subscribe
+
+
+{"type":"pong","event_id":12345}
+publish
+
+
+{"type":"client_tool_call","client_tool_call":{"tool_name":"check_account_status","tool_call_id":"tool_call_123","parameters":{"user_id":"user_123"}}}
+subscribe
+
+
+{"type":"client_tool_result","tool_call_id":"tool_call_123","result":"Account is active and in good standing","is_error":false}
+publish
+
+
+{"type":"contextual_update","text":"User is viewing the pricing page"}
+publish
+
+
+{"type":"user_message","text":"I would like to upgrade my account"}
+publish
+
+
+{"type":"user_activity"}
+publish
+
+Establish a WebSocket connection for real-time conversations with an AI agent.
+
+Handshake
+WSS
+
+https://wss//api.elevenlabs.io
+/v1/convai/conversation
+
+Query parameters
+agent_id
+any
+Required
+The unique identifier for the voice to use in the TTS process.
+Send
+User Audio Chunk
+object
+Required
+
+Show 1 properties
+OR
+Pong
+object
+Required
+
+Show 2 properties
+OR
+Conversation Initiation Client Data
+object
+Required
+
+Show 4 properties
+OR
+Client Tool Result
+object
+Required
+
+Show 4 properties
+OR
+Contextual Update
+object
+Required
+
+Show 2 properties
+OR
+User Message
+object
+Required
+
+Show 2 properties
+OR
+User Activity
+object
+Required
+
+Show 1 properties
+Receive
+Conversation Initiation Metadata
+object
+Required
+
+Show 2 properties
+OR
+User Transcript
+object
+Required
+
+Show 2 properties
+OR
+Agent Response
+object
+Required
+
+Show 2 properties
+OR
+Agent Response Correction
+object
+Required
+
+Show 2 properties
+OR
+Audio Response
+object
+Required
+
+Show 2 properties
+OR
+Interruption
+object
+Required
+
+Show 2 properties
+OR
+Ping
+object
+Required
+
+Show 2 properties
+OR
+Client Tool Call
+object
+Required
+
+Show 2 properties
+OR
+Contextual Update
+object
+Required
+
+Show 2 properties
+OR
+VAD Score
+object
+Required
+
+Show 2 properties
+OR
+Internal Tentative Agent Response
+object
+Required
+
+Show 2 properties

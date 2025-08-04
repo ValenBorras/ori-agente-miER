@@ -1,6 +1,6 @@
 "use client";
 
-import MinimalistAvatarWrapper from "@/components/MinimalistAvatar";
+import MinimalistElevenLabsAvatar from "@/components/MinimalistElevenLabsAvatar";
 
 export default function App() {
   return (
@@ -11,7 +11,7 @@ export default function App() {
       }}
     >
       <div className="w-full max-w-md flex flex-col items-center justify-center">
-        <MinimalistAvatarWrapper />
+        <MinimalistElevenLabsAvatar />
       </div>
     </div>
   );

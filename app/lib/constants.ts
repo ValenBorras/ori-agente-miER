@@ -61,4 +61,9 @@ export const ENV_IDS = {
     process.env.NEXT_PUBLIC_VOICE || "cddb6172a34a4f83ae225892c4219d31",
   INTRODUCTION:
     process.env.NEXT_PUBLIC_INTRODUCTION || "Hola! soy JUJO, asistente virtual del gobierno de Entre Rios, en que te puedo ayudar?",
+  // ElevenLabs Configuration
+  ELEVENLABS_AGENT_ID:
+    process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || "kRdQVspuGMQWp8QZ3Jnp",
+  ELEVENLABS_API_KEY:
+    process.env.ELEVENLABS_API_KEY || "",
 };
