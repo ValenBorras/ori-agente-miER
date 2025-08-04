@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-import { GithubIcon } from "./Icons";
-
 export default function NavBar() {
   return (
     <>
@@ -18,7 +16,7 @@ export default function NavBar() {
           </Link>
           <div className="bg-gradient-to-br from-lime-300 to-lime-600 bg-clip-text">
             <p className="text-lg md:text-xl font-semibold text-transparent">
-             Demo JUJO Interactivo - Mi Entre Rios
+              Demo JUJO Interactivo - Mi Entre Rios
             </p>
           </div>
         </div>

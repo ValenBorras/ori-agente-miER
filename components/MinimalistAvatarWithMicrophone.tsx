@@ -55,6 +55,7 @@ function MinimalistAvatarWithMicrophone() {
         method: "POST",
       });
       const token = await response.text();
+
       return token;
     } catch (error) {
       console.error("Error fetching access token:", error);
@@ -66,8 +67,9 @@ function MinimalistAvatarWithMicrophone() {
     try {
       setIsLoading(true);
       console.log("=== INICIANDO SESIÓN DE AVATAR ===");
-      
+
       const newToken = await fetchAccessToken();
+
       console.log("✅ Token de acceso obtenido");
 
       const avatar = initAvatar(newToken);
@@ -153,24 +155,25 @@ function MinimalistAvatarWithMicrophone() {
           </div>
         )}
       </div>
-      
+
       {/* Microphone Monitor - Only show when connected */}
       {sessionState === StreamingAvatarSessionState.CONNECTED && (
         <div className="w-full max-w-sm">
           <MicrophoneNoiseMonitor
-            variant="circle"
-            size="medium"
-            sensitivity={7}
-            onMuteToggle={handleMuteToggle}
-            onAudioLevel={handleAudioLevel}
             autoStart={true}
             className="w-full"
+            sensitivity={7}
+            size="medium"
+            variant="circle"
+            onAudioLevel={handleAudioLevel}
+            onMuteToggle={handleMuteToggle}
           />
-          
+
           {/* Audio Level Display */}
           <div className="text-center mt-2">
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              Audio Level: <span className="font-mono">{audioLevel.toFixed(1)}%</span>
+              Audio Level:{" "}
+              <span className="font-mono">{audioLevel.toFixed(1)}%</span>
             </div>
             {audioLevel > 20 && !isMuted && (
               <div className="text-xs text-green-500 animate-pulse">
@@ -180,7 +183,7 @@ function MinimalistAvatarWithMicrophone() {
           </div>
         </div>
       )}
-      
+
       {/* Botones de control */}
       <div className="flex justify-center">
         {sessionState === StreamingAvatarSessionState.INACTIVE && !isLoading ? (
@@ -220,4 +223,4 @@ export default function MinimalistAvatarWithMicrophoneWrapper() {
       <MinimalistAvatarWithMicrophone />
     </StreamingAvatarProvider>
   );
-} 
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseMicrophoneOptions {
   sensitivity?: number; // 1-10, default 5
@@ -17,11 +17,10 @@ interface UseMicrophoneReturn {
   stopListening: () => void;
 }
 
-export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophoneReturn {
-  const {
-    sensitivity = 5,
-    fftSize = 256
-  } = options;
+export function useMicrophone(
+  options: UseMicrophoneOptions = {},
+): UseMicrophoneReturn {
+  const { sensitivity = 5, fftSize = 256 } = options;
 
   const [isListening, setIsListening] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -38,28 +37,36 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
   // Check browser support
   useEffect(() => {
     const supported = !!(navigator.mediaDevices && window.AudioContext);
+
     setIsSupported(supported);
-    
+
     if (!supported) {
-      setError('Web Audio API not supported in this browser');
+      setError("Web Audio API not supported in this browser");
     }
   }, []);
 
   // Calculate audio level from frequency data
-  const calculateAudioLevel = useCallback((dataArray: Uint8Array): number => {
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i];
-    }
-    const average = sum / dataArray.length;
-    
-    // Apply sensitivity scaling (1-10 to 0.1-2.0 multiplier)
-    const sensitivityMultiplier = (sensitivity / 5) * 0.5 + 0.5;
-    const scaledLevel = Math.min(100, (average / 128) * 100 * sensitivityMultiplier);
-    
-    // Smooth the transition
-    return Math.max(0, Math.min(100, scaledLevel));
-  }, [sensitivity]);
+  const calculateAudioLevel = useCallback(
+    (dataArray: Uint8Array): number => {
+      let sum = 0;
+
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+
+      // Apply sensitivity scaling (1-10 to 0.1-2.0 multiplier)
+      const sensitivityMultiplier = (sensitivity / 5) * 0.5 + 0.5;
+      const scaledLevel = Math.min(
+        100,
+        (average / 128) * 100 * sensitivityMultiplier,
+      );
+
+      // Smooth the transition
+      return Math.max(0, Math.min(100, scaledLevel));
+    },
+    [sensitivity],
+  );
 
   // Update audio level animation
   const updateAudioLevel = useCallback(() => {
@@ -69,6 +76,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
 
     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
     const level = calculateAudioLevel(dataArrayRef.current);
+
     setAudioLevel(level);
 
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
@@ -77,31 +85,34 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
   // Request microphone permission
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (!isSupported) {
-      setError('Web Audio API not supported');
+      setError("Web Audio API not supported");
+
       return false;
     }
 
     try {
       setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        } 
+          autoGainControl: true,
+        },
       });
-      
+
       setHasPermission(true);
       mediaStreamRef.current = stream;
-      
+
       // Stop the stream immediately after getting permission
-      stream.getTracks().forEach(track => track.stop());
-      
+      stream.getTracks().forEach((track) => track.stop());
+
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+
       setError(`Microphone permission denied: ${errorMessage}`);
       setHasPermission(false);
+
       return false;
     }
   }, [isSupported]);
@@ -109,36 +120,40 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
   // Start listening
   const startListening = useCallback(async (): Promise<void> => {
     if (!isSupported) {
-      setError('Web Audio API not supported');
+      setError("Web Audio API not supported");
+
       return;
     }
 
     if (!hasPermission) {
       const granted = await requestPermission();
+
       if (!granted) return;
     }
 
     try {
       setError(null);
-      
+
       // Get microphone stream
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        } 
+          autoGainControl: true,
+        },
       });
-      
+
       mediaStreamRef.current = stream;
 
       // Create audio context and analyser
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
+
       analyser.fftSize = fftSize;
       analyser.smoothingTimeConstant = 0.8;
 
       const source = audioContext.createMediaStreamSource(stream);
+
       source.connect(analyser);
 
       audioContextRef.current = audioContext;
@@ -146,16 +161,22 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
       dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
 
       setIsListening(true);
-      
+
       // Start animation loop
       updateAudioLevel();
-      
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+
       setError(`Failed to start microphone: ${errorMessage}`);
       setIsListening(false);
     }
-  }, [isSupported, hasPermission, requestPermission, fftSize, updateAudioLevel]);
+  }, [
+    isSupported,
+    hasPermission,
+    requestPermission,
+    fftSize,
+    updateAudioLevel,
+  ]);
 
   // Stop listening
   const stopListening = useCallback(() => {
@@ -165,7 +186,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
     }
 
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
     }
 
@@ -176,7 +197,7 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
 
     analyserRef.current = null;
     dataArrayRef.current = null;
-    
+
     setIsListening(false);
     setAudioLevel(0);
   }, []);
@@ -196,6 +217,6 @@ export function useMicrophone(options: UseMicrophoneOptions = {}): UseMicrophone
     error,
     requestPermission,
     startListening,
-    stopListening
+    stopListening,
   };
-} 
+}

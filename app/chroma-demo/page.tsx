@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import MinimalistAvatarWrapper from '../../components/MinimalistAvatar';
+import MinimalistAvatarWrapper from "../../components/MinimalistAvatar";
 
 export default function ChromaDemo() {
   return (
@@ -11,10 +11,12 @@ export default function ChromaDemo() {
             HeyGen Avatar with Chroma Key
           </h1>
           <p className="text-xl text-gray-300 mb-2">
-            AI Avatar with transparent background using real-time chroma key processing
+            AI Avatar with transparent background using real-time chroma key
+            processing
           </p>
           <p className="text-sm text-gray-400">
-            The white background is automatically removed in real-time for a seamless integration
+            The white background is automatically removed in real-time for a
+            seamless integration
           </p>
         </div>
 
@@ -32,16 +34,17 @@ export default function ChromaDemo() {
             <h2 className="text-2xl font-semibold text-white mb-6">
               Key Features
             </h2>
-            
+
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
               <h3 className="text-lg font-medium text-white mb-2">
                 🎭 Real-time Chroma Key
               </h3>
               <p className="text-gray-300 text-sm">
-                Automatically detects and removes white background pixels using advanced algorithms
+                Automatically detects and removes white background pixels using
+                advanced algorithms
               </p>
             </div>
-            
+
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
               <h3 className="text-lg font-medium text-white mb-2">
                 ⚡ High Performance
@@ -50,22 +53,24 @@ export default function ChromaDemo() {
                 Optimized canvas processing with 60 FPS performance monitoring
               </p>
             </div>
-            
+
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
               <h3 className="text-lg font-medium text-white mb-2">
                 🎛️ Adjustable Parameters
               </h3>
               <p className="text-gray-300 text-sm">
-                Fine-tune white detection, tolerance, and edge smoothing in real-time
+                Fine-tune white detection, tolerance, and edge smoothing in
+                real-time
               </p>
             </div>
-            
+
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
               <h3 className="text-lg font-medium text-white mb-2">
                 🔧 Easy Integration
               </h3>
               <p className="text-gray-300 text-sm">
-                Drop-in replacement for standard video components with full TypeScript support
+                Drop-in replacement for standard video components with full
+                TypeScript support
               </p>
             </div>
           </div>
@@ -73,8 +78,9 @@ export default function ChromaDemo() {
 
         <div className="mt-12 text-center">
           <p className="text-sm text-gray-400">
-            Click "Comenzar Chat" to start the avatar session and see the chroma key effect in action.
-            Use the settings button (⚙️) to adjust the chroma key parameters.
+            Click "Comenzar Chat" to start the avatar session and see the chroma
+            key effect in action. Use the settings button (⚙️) to adjust the
+            chroma key parameters.
           </p>
         </div>
       </div>

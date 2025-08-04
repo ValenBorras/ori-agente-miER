@@ -1,6 +1,6 @@
 /**
  * ElevenLabsAvatarDemo Component
- * 
+ *
  * This is a demo page showing the new ElevenLabs + HeyGen architecture
  * for testing and development purposes.
  */
@@ -8,6 +8,7 @@
 "use client";
 
 import React from "react";
+
 import MinimalistElevenLabsAvatar from "./MinimalistElevenLabsAvatar";
 
 export default function ElevenLabsAvatarDemo() {
@@ -20,15 +21,18 @@ export default function ElevenLabsAvatarDemo() {
             ElevenLabs + HeyGen Integration Demo
           </h1>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Experience the new architecture where ElevenLabs Conversational AI handles all conversation logic 
-            while HeyGen Avatar provides the visual presentation. Speak naturally to the AI assistant!
+            Experience the new architecture where ElevenLabs Conversational AI
+            handles all conversation logic while HeyGen Avatar provides the
+            visual presentation. Speak naturally to the AI assistant!
           </p>
         </div>
 
         {/* Architecture Description */}
         <div className="grid md:grid-cols-3 gap-6 mb-8 text-sm">
           <div className="bg-blue-900 bg-opacity-50 p-4 rounded-lg">
-            <h3 className="text-blue-300 font-semibold mb-2">🎙️ ElevenLabs (Brain)</h3>
+            <h3 className="text-blue-300 font-semibold mb-2">
+              🎙️ ElevenLabs (Brain)
+            </h3>
             <ul className="text-blue-100 space-y-1">
               <li>• Speech recognition</li>
               <li>• Conversation logic</li>
@@ -36,7 +40,7 @@ export default function ElevenLabsAvatarDemo() {
               <li>• Knowledge base</li>
             </ul>
           </div>
-          
+
           <div className="bg-purple-900 bg-opacity-50 p-4 rounded-lg">
             <h3 className="text-purple-300 font-semibold mb-2">🔄 Bridge</h3>
             <ul className="text-purple-100 space-y-1">
@@ -46,9 +50,11 @@ export default function ElevenLabsAvatarDemo() {
               <li>• Error handling</li>
             </ul>
           </div>
-          
+
           <div className="bg-green-900 bg-opacity-50 p-4 rounded-lg">
-            <h3 className="text-green-300 font-semibold mb-2">🎭 HeyGen (Face)</h3>
+            <h3 className="text-green-300 font-semibold mb-2">
+              🎭 HeyGen (Face)
+            </h3>
             <ul className="text-green-100 space-y-1">
               <li>• Visual presentation</li>
               <li>• Lip-sync animation</li>

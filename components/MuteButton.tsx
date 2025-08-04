@@ -1,11 +1,12 @@
-import React from 'react';
-import { MicIcon, MicOffIcon } from './Icons';
+import React from "react";
+
+import { MicIcon, MicOffIcon } from "./Icons";
 
 interface MuteButtonProps {
   isMuted: boolean;
   onToggle: () => void;
   disabled?: boolean;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   showLabel?: boolean;
   className?: string;
 }
@@ -14,20 +15,20 @@ export function MuteButton({
   isMuted,
   onToggle,
   disabled = false,
-  size = 'medium',
+  size = "medium",
   showLabel = false,
-  className = ''
+  className = "",
 }: MuteButtonProps) {
   const sizeClasses = {
-    small: 'w-8 h-8',
-    medium: 'w-12 h-12',
-    large: 'w-16 h-16'
+    small: "w-8 h-8",
+    medium: "w-12 h-12",
+    large: "w-16 h-16",
   };
 
   const iconSizes = {
     small: 16,
     medium: 20,
-    large: 24
+    large: 24,
   };
 
   const buttonClasses = `
@@ -41,14 +42,14 @@ export function MuteButton({
 
   const getButtonStyle = () => {
     if (disabled) {
-      return 'bg-gray-300 text-gray-500 hover:bg-gray-300 focus:ring-gray-400';
+      return "bg-gray-300 text-gray-500 hover:bg-gray-300 focus:ring-gray-400";
     }
-    
+
     if (isMuted) {
-      return 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-400 active:bg-red-700';
+      return "bg-red-500 text-white hover:bg-red-600 focus:ring-red-400 active:bg-red-700";
     }
-    
-    return 'bg-green-500 text-white hover:bg-green-600 focus:ring-green-400 active:bg-green-700';
+
+    return "bg-green-500 text-white hover:bg-green-600 focus:ring-green-400 active:bg-green-700";
   };
 
   const handleClick = () => {
@@ -58,7 +59,7 @@ export function MuteButton({
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleClick();
     }
@@ -67,14 +68,14 @@ export function MuteButton({
   return (
     <div className="flex flex-col items-center gap-2">
       <button
-        type="button"
+        aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}
+        aria-pressed={isMuted}
         className={`${buttonClasses} ${getButtonStyle()}`}
+        disabled={disabled}
+        title={`${isMuted ? "Unmute" : "Mute"} microphone (M)`}
+        type="button"
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        disabled={disabled}
-        aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
-        aria-pressed={isMuted}
-        title={`${isMuted ? 'Unmute' : 'Mute'} microphone (M)`}
       >
         {/* Icon */}
         <div className="relative">
@@ -92,14 +93,14 @@ export function MuteButton({
       {/* Optional label */}
       {showLabel && (
         <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-          {isMuted ? 'Muted' : 'Active'}
+          {isMuted ? "Muted" : "Active"}
         </span>
       )}
 
       {/* Keyboard shortcut hint */}
       <span className="text-xs text-gray-400 dark:text-gray-500">
-        Press M to {isMuted ? 'unmute' : 'mute'}
+        Press M to {isMuted ? "unmute" : "mute"}
       </span>
     </div>
   );
-} 
+}

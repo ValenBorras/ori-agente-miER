@@ -1,17 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useMicrophone } from './logic/useMicrophone';
-import { useKeyboardShortcuts } from './logic/useKeyboardShortcuts';
-import { AudioLevelIndicator } from './AudioLevelIndicator';
-import { MuteButton } from './MuteButton';
-import { PermissionPrompt } from './PermissionPrompt';
+import React, { useEffect, useState, useCallback } from "react";
+
+import { useMicrophone } from "./logic/useMicrophone";
+import { useKeyboardShortcuts } from "./logic/useKeyboardShortcuts";
+import { AudioLevelIndicator } from "./AudioLevelIndicator";
+import { MuteButton } from "./MuteButton";
+import { PermissionPrompt } from "./PermissionPrompt";
 
 interface MicrophoneNoiseMonitorProps {
   onMuteToggle?: (isMuted: boolean) => void;
   onAudioLevel?: (level: number) => void;
   sensitivity?: number; // 1-10, default 5
   showMuteButton?: boolean; // default true
-  variant?: 'bars' | 'circle' | 'pulse';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "bars" | "circle" | "pulse";
+  size?: "small" | "medium" | "large";
   autoStart?: boolean; // default false
   className?: string;
 }
@@ -21,10 +22,10 @@ export function MicrophoneNoiseMonitor({
   onAudioLevel,
   sensitivity = 5,
   showMuteButton = true,
-  variant = 'bars',
-  size = 'medium',
+  variant = "bars",
+  size = "medium",
   autoStart = false,
-  className = ''
+  className = "",
 }: MicrophoneNoiseMonitorProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -37,18 +38,19 @@ export function MicrophoneNoiseMonitor({
     error,
     requestPermission,
     startListening,
-    stopListening
+    stopListening,
   } = useMicrophone({
     sensitivity,
     fftSize: 256,
-    updateFrequency: 60
+    updateFrequency: 60,
   });
 
   // Handle mute toggle
   const handleMuteToggle = useCallback(() => {
     const newMutedState = !isMuted;
+
     setIsMuted(newMutedState);
-    
+
     if (newMutedState) {
       // Muted - stop listening
       stopListening();
@@ -67,13 +69,21 @@ export function MicrophoneNoiseMonitor({
         });
       }
     }
-    
+
     onMuteToggle?.(newMutedState);
-  }, [isMuted, hasPermission, stopListening, startListening, requestPermission, onMuteToggle]);
+  }, [
+    isMuted,
+    hasPermission,
+    stopListening,
+    startListening,
+    requestPermission,
+    onMuteToggle,
+  ]);
 
   // Handle audio level changes
   useEffect(() => {
     const level = isMuted ? 0 : audioLevel;
+
     onAudioLevel?.(level);
   }, [audioLevel, isMuted, onAudioLevel]);
 
@@ -88,7 +98,7 @@ export function MicrophoneNoiseMonitor({
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onMuteToggle: handleMuteToggle,
-    enabled: isSupported && hasPermission
+    enabled: isSupported && hasPermission,
   });
 
   // Determine if we should show permission prompt
@@ -102,9 +112,9 @@ export function MicrophoneNoiseMonitor({
       {/* Permission Prompt */}
       {shouldShowPermissionPrompt && (
         <PermissionPrompt
-          onRequestPermission={requestPermission}
           error={error}
           isSupported={isSupported}
+          onRequestPermission={requestPermission}
         />
       )}
 
@@ -117,10 +127,10 @@ export function MicrophoneNoiseMonitor({
               audioLevel={isMuted ? 0 : audioLevel}
               isListening={isListening && !isMuted}
               isMuted={isMuted}
-              variant={variant}
               size={size}
+              variant={variant}
             />
-            
+
             {/* Status text */}
             <div className="text-center">
               {isMuted ? (
@@ -146,22 +156,22 @@ export function MicrophoneNoiseMonitor({
           {/* Mute Button */}
           {showMuteButton && (
             <MuteButton
-              isMuted={isMuted}
-              onToggle={handleMuteToggle}
               disabled={!isSupported}
-              size={size}
+              isMuted={isMuted}
               showLabel={true}
+              size={size}
+              onToggle={handleMuteToggle}
             />
           )}
 
           {/* Manual start button (when not auto-starting) */}
           {!autoStart && hasPermission && !isMuted && !isActive && (
             <button
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
               onClick={() => {
                 startListening();
                 setIsActive(true);
               }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
               Start Listening
             </button>
@@ -177,4 +187,4 @@ export function MicrophoneNoiseMonitor({
       )}
     </div>
   );
-} 
+}

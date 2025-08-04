@@ -21,11 +21,15 @@ export async function POST() {
 
     if (!res.ok) {
       const errorText = await res.text();
+
       console.error("API Error Response:", errorText);
-      throw new Error(`API request failed with status ${res.status}: ${errorText}`);
+      throw new Error(
+        `API request failed with status ${res.status}: ${errorText}`,
+      );
     }
 
     const data = await res.json();
+
     console.log("Success response data:", data);
 
     return new Response(data.data.token, {
@@ -34,8 +38,11 @@ export async function POST() {
   } catch (error) {
     console.error("Error retrieving access token:", error);
 
-    return new Response(`Failed to retrieve access token: ${error instanceof Error ? error.message : 'Unknown error'}`, {
-      status: 500,
-    });
+    return new Response(
+      `Failed to retrieve access token: ${error instanceof Error ? error.message : "Unknown error"}`,
+      {
+        status: 500,
+      },
+    );
   }
 }

@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
-import { ChromaKeyOptions } from '../../types/chromaKey';
-import { DEFAULT_CHROMA_OPTIONS } from '../utils/chromaKey';
+import { useState, useCallback, useMemo } from "react";
+
+import { ChromaKeyOptions } from "../../types/chromaKey";
+import { DEFAULT_CHROMA_OPTIONS } from "../utils/chromaKey";
 
 export interface UseChromaKeyReturn {
   chromaOptions: ChromaKeyOptions;
@@ -17,56 +18,62 @@ export interface UseChromaKeyReturn {
  */
 export function useChromaKey(
   initialOptions: Partial<ChromaKeyOptions> = {},
-  initialEnabled = false
+  initialEnabled = false,
 ): UseChromaKeyReturn {
   const [chromaOptions, setChromaOptions] = useState<ChromaKeyOptions>({
     ...DEFAULT_CHROMA_OPTIONS,
     ...initialOptions,
   });
-  
+
   const [isChromaEnabled, setIsChromaEnabled] = useState(initialEnabled);
-  
-  const updateOption = useCallback((key: keyof ChromaKeyOptions, value: number) => {
-    setChromaOptions(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, []);
-  
+
+  const updateOption = useCallback(
+    (key: keyof ChromaKeyOptions, value: number) => {
+      setChromaOptions((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [],
+  );
+
   const updateOptions = useCallback((options: Partial<ChromaKeyOptions>) => {
-    setChromaOptions(prev => ({
+    setChromaOptions((prev) => ({
       ...prev,
       ...options,
     }));
   }, []);
-  
+
   const toggleChroma = useCallback(() => {
-    setIsChromaEnabled(prev => !prev);
+    setIsChromaEnabled((prev) => !prev);
   }, []);
-  
+
   const resetToDefaults = useCallback(() => {
     setChromaOptions(DEFAULT_CHROMA_OPTIONS);
   }, []);
-  
+
   const setChromaEnabled = useCallback((enabled: boolean) => {
     setIsChromaEnabled(enabled);
   }, []);
-  
-  return useMemo(() => ({
-    chromaOptions,
-    isChromaEnabled,
-    updateOption,
-    updateOptions,
-    toggleChroma,
-    resetToDefaults,
-    setChromaEnabled,
-  }), [
-    chromaOptions,
-    isChromaEnabled,
-    updateOption,
-    updateOptions,
-    toggleChroma,
-    resetToDefaults,
-    setChromaEnabled,
-  ]);
+
+  return useMemo(
+    () => ({
+      chromaOptions,
+      isChromaEnabled,
+      updateOption,
+      updateOptions,
+      toggleChroma,
+      resetToDefaults,
+      setChromaEnabled,
+    }),
+    [
+      chromaOptions,
+      isChromaEnabled,
+      updateOption,
+      updateOptions,
+      toggleChroma,
+      resetToDefaults,
+      setChromaEnabled,
+    ],
+  );
 }

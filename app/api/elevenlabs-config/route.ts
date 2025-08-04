@@ -1,6 +1,6 @@
 /**
  * ElevenLabs Configuration API Route
- * 
+ *
  * This API route provides ElevenLabs configuration to the client-side
  * while keeping the API key secure on the server side.
  */
@@ -15,14 +15,14 @@ export async function GET() {
     if (!agentId) {
       return NextResponse.json(
         { error: "NEXT_PUBLIC_ELEVENLABS_AGENT_ID not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!apiKey) {
       return NextResponse.json(
         { error: "ELEVENLABS_API_KEY not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -35,9 +35,10 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error getting ElevenLabs configuration:", error);
+
     return NextResponse.json(
       { error: "Failed to get ElevenLabs configuration" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -49,7 +50,7 @@ export async function POST() {
     if (!apiKey) {
       return NextResponse.json(
         { error: "ELEVENLABS_API_KEY not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -60,9 +61,10 @@ export async function POST() {
     });
   } catch (error) {
     console.error("Error getting ElevenLabs API key:", error);
+
     return NextResponse.json(
       { error: "Failed to get API key" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

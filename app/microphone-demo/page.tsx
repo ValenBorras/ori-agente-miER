@@ -1,4 +1,4 @@
-import { MicrophoneNoiseMonitorDemo } from '@/components/MicrophoneNoiseMonitorDemo';
+import { MicrophoneNoiseMonitorDemo } from "@/components/MicrophoneNoiseMonitorDemo";
 
 export default function MicrophoneDemoPage() {
   return (
@@ -6,4 +6,4 @@ export default function MicrophoneDemoPage() {
       <MicrophoneNoiseMonitorDemo />
     </div>
   );
-} 
+}

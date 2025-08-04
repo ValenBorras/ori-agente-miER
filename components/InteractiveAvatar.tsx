@@ -73,8 +73,9 @@ function InteractiveAvatar() {
     try {
       console.log("=== STARTING AVATAR SESSION ===");
       console.log("Using default config:", JSON.stringify(config, null, 2));
-      
+
       const newToken = await fetchAccessToken();
+
       console.log("✅ Got access token successfully");
       console.log("Got access token, initializing avatar...");
       const avatar = initAvatar(newToken);
@@ -90,14 +91,14 @@ function InteractiveAvatar() {
       });
       avatar.on(StreamingEvents.STREAM_READY, async (event) => {
         console.log(">>>>> Stream ready:", event.detail);
-        
+
         // Trigger the opening intro using knowledge base
         setTimeout(async () => {
           try {
             console.log("Activating knowledge base intro...");
             await avatar.speak({
               text: "Hello", // Simple trigger
-              task_type: TaskType.TALK
+              task_type: TaskType.TALK,
             });
           } catch (error) {
             console.error("Error activating intro:", error);
@@ -106,7 +107,7 @@ function InteractiveAvatar() {
               console.log("Trying alternative method with empty text...");
               await avatar.speak({
                 text: "", // Empty text
-                task_type: TaskType.TALK
+                task_type: TaskType.TALK,
               });
             } catch (fallbackError) {
               console.error("Error in alternative method:", fallbackError);
@@ -133,7 +134,10 @@ function InteractiveAvatar() {
         console.log(">>>>> Avatar end message:", event);
       });
 
-      console.log("Starting avatar with config:", JSON.stringify(config, null, 2));
+      console.log(
+        "Starting avatar with config:",
+        JSON.stringify(config, null, 2),
+      );
       await startAvatar(config);
       console.log("✅ Avatar started successfully");
 

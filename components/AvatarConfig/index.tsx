@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   AvatarQuality,
   ElevenLabsModel,
@@ -15,7 +15,7 @@ import { Select } from "../Select";
 
 import { Field } from "./Field";
 
-import { AVATARS, STT_LANGUAGE_LIST, ENV_IDS } from "@/app/lib/constants";
+import { STT_LANGUAGE_LIST, ENV_IDS } from "@/app/lib/constants";
 
 interface AvatarConfigProps {
   onConfigChange: (config: StartAvatarRequest) => void;
@@ -43,19 +43,19 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
       </div>
       <Field label="Knowledge Base ID (Fixed)">
         <Input
+          className="bg-zinc-800 text-zinc-400"
+          disabled={true}
           placeholder="Knowledge Base ID"
           value={ENV_IDS.KNOWLEDGE_ID}
-          disabled={true}
-          className="bg-zinc-800 text-zinc-400"
           onChange={() => {}}
         />
       </Field>
       <Field label="Avatar ID (Fixed)">
         <Input
+          className="bg-zinc-800 text-zinc-400"
+          disabled={true}
           placeholder="Avatar ID"
           value={ENV_IDS.AVATAR_ID}
-          disabled={true}
-          className="bg-zinc-800 text-zinc-400"
           onChange={() => {}}
         />
       </Field>
@@ -96,10 +96,10 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
           </h1>
           <Field label="Voice ID (Fixed)">
             <Input
+              className="bg-zinc-800 text-zinc-400"
+              disabled={true}
               placeholder="Voice ID"
               value={ENV_IDS.VOICE_ID}
-              disabled={true}
-              className="bg-zinc-800 text-zinc-400"
               onChange={() => {}}
             />
           </Field>

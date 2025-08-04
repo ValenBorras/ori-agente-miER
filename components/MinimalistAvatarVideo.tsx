@@ -17,4 +17,4 @@ export const MinimalistAvatarVideo = forwardRef<HTMLVideoElement>(({}, ref) => {
   );
 });
 
-MinimalistAvatarVideo.displayName = "MinimalistAvatarVideo"; 
+MinimalistAvatarVideo.displayName = "MinimalistAvatarVideo";
