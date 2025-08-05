@@ -344,19 +344,19 @@ function MinimalistElevenLabsAvatarComponent({
       case ConversationState.LISTENING:
         return (
           <div className="text-green-400 text-xs sm:text-sm">
-            ✓ Conectado
+            ✓ Listening...
           </div>
         );
       case ConversationState.PROCESSING:
         return (
           <div className="text-blue-400 text-xs sm:text-sm">
-            🧠 Procesando...
+            🧠 Processing...
           </div>
         );
       case ConversationState.RESPONDING:
         return (
           <div className="text-purple-400 text-xs sm:text-sm">
-            💬 Respondiendo...
+            💬 Responding...
           </div>
         );
       case ConversationState.ERROR:
@@ -454,18 +454,18 @@ function MinimalistElevenLabsAvatarComponent({
           </div>
         )}
 
-        {/* Listening Indicator */}
+        {/* ElevenLabs Listening Indicator */}
         {isElevenLabsListening && (
           <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            Escuchando
+            Listening
           </div>
         )}
 
         {/* Speaking Indicator */}
         {isPuppetSpeaking && (
           <div className="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs">
-            Hablando
+            Speaking
           </div>
         )}
       </div>
@@ -482,7 +482,7 @@ function MinimalistElevenLabsAvatarComponent({
         ) : isLoading || conversationState === ConversationState.CONNECTING ? (
           <div className="flex items-center gap-2 text-white mt-4 sm:mt-3 text-sm sm:text-base">
             <LoadingIcon />
-            <span>Conectando con JUJO...</span>
+            <span>Conectando a ElevenLabs...</span>
           </div>
         ) : conversationState !== ConversationState.INACTIVE ? (
           <div className="flex flex-col items-center gap-3 sm:gap-2 mt-4 sm:mt-3 w-full">

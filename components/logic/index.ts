@@ -1,5 +1,12 @@
 export { useStreamingAvatarSession } from "./useStreamingAvatarSession";
+export { useVoiceChat } from "./useVoiceChat";
+export { useConnectionQuality } from "./useConnectionQuality";
+export { useMessageHistory } from "./useMessageHistory";
+export { useInterrupt } from "./useInterrupt";
+export { useMicrophone } from "./useMicrophone";
+export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 export {
-  StreamingAvatarProvider,
   StreamingAvatarSessionState,
-} from "./context"; 
+  StreamingAvatarProvider,
+  MessageSender,
+} from "./context";
