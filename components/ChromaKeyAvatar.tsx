@@ -121,7 +121,7 @@ export const ChromaKeyAvatar = forwardRef<
       } catch (error) {
         handleError(error as Error);
       }
-    }, [chromaEnabled, handleError]);
+    }, [chromaEnabled, handleError, finalOptions]);
 
     // Start/stop processing
     useEffect(() => {
@@ -157,8 +157,9 @@ export const ChromaKeyAvatar = forwardRef<
       }
 
       return () => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
+        const currentVideo = videoRef.current;
+        if (currentVideo) {
+          currentVideo.srcObject = null;
         }
       };
     }, [stream, onStreamReady]);

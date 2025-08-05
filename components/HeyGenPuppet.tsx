@@ -31,7 +31,7 @@ import { useMemoizedFn, useUnmount } from "ahooks";
 import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { ChromaKeyAvatar } from "./ChromaKeyAvatar";
-import { LoadingIcon } from "./Icons";
+
 
 import { ENV_IDS } from "@/app/lib/constants";
 
@@ -77,7 +77,7 @@ function HeyGenPuppetComponent({
     avatarRef,
   } = useStreamingAvatarSession();
 
-  const [isLoading, setIsLoading] = useState(false);
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const mediaStream = useRef<HTMLVideoElement>(null);
 
@@ -108,7 +108,7 @@ function HeyGenPuppetComponent({
         return;
       }
 
-      setIsLoading(true);
+
 
       // ALWAYS get a fresh token for each new session
       console.log(`⏱️ [${new Date().toISOString()}] HEYGEN_FETCHING_NEW_TOKEN`);
@@ -141,11 +141,10 @@ function HeyGenPuppetComponent({
         });
 
         avatarRef.current.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-          setIsLoading(false);
+          // Stream disconnected
         });
 
         avatarRef.current.on(StreamingEvents.STREAM_READY, async (_event) => {
-          setIsLoading(false);
           onReady?.();
         });
       }
@@ -154,7 +153,6 @@ function HeyGenPuppetComponent({
       await startAvatar(PUPPET_CONFIG);
     } catch (error) {
       console.error("❌ Error initializing HeyGen puppet:", error);
-      setIsLoading(false);
       onError?.(error as Error);
     }
   });
@@ -361,22 +359,9 @@ function HeyGenPuppetComponent({
         </div>
       )}
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-white">
-            <LoadingIcon />
-            <span>Initializing puppet...</span>
-          </div>
-        </div>
-      )}
 
-      {/* Speaking Indicator */}
-      {isSpeaking && (
-        <div className="absolute bottom-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
-          Speaking...
-        </div>
-      )}
+
+
     </div>
   );
 }
@@ -386,7 +371,7 @@ function HeyGenPuppetComponent({
  */
 export function HeyGenPuppet(props: HeyGenPuppetProps) {
   return (
-    <StreamingAvatarProvider basePath={process.env.NEXT_PUBLIC_BASE_API_URL}>
+    <StreamingAvatarProvider>
       <HeyGenPuppetComponent {...props} />
     </StreamingAvatarProvider>
   );
