@@ -37,10 +37,19 @@ export default function RootLayout({
       lang="en"
     >
       <head />
-      <body className="h-screen bg-image-background text-slate-700 overflow-hidden">
-        <div className="h-full flex flex-col">
+      <body className="h-screen text-slate-700 overflow-hidden">
+        {/* Fixed background image */}
+        <div 
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0"
+          style={{
+            backgroundImage: "url(/gobER-expandida.webp)",
+          }}
+        />
+        
+        {/* Content container with navbar, scrollable main, and footer */}
+        <div className="relative z-10 h-full flex flex-col max-w-7xl mx-auto">
           <NavBar />
-          <main className="flex-1 flex items-center justify-center overflow-hidden">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
             {children}
           </main>
           <Footer />

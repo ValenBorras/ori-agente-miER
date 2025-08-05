@@ -35,7 +35,7 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
   const [showMore, setShowMore] = useState<boolean>(false);
 
   return (
-    <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
+    <div className="relative flex flex-col gap-4 w-full max-w-[550px] py-8 max-h-full overflow-y-auto px-4">
       <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
         <p className="text-blue-300 text-sm text-center">
           Using fixed configuration from environment variables

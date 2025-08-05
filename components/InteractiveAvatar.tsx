@@ -20,8 +20,6 @@ import { useVoiceChat } from "./logic/useVoiceChat";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
-import { ScriptPlayer } from "./ScriptPlayer";
-import { PRESENTATION_SCRIPT } from "@/lib/scripts";
 
 import { ENV_IDS } from "@/app/lib/constants";
 
@@ -48,7 +46,6 @@ function InteractiveAvatar() {
   const { startVoiceChat } = useVoiceChat();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
-  const [showScriptPlayer, setShowScriptPlayer] = useState(false);
 
   // Log the configuration to verify environment variables are loaded
   console.log("Using default avatar configuration");
@@ -184,14 +181,6 @@ function InteractiveAvatar() {
           {sessionState === StreamingAvatarSessionState.CONNECTED ? (
             <div className="flex flex-col gap-3 w-full">
               <AvatarControls />
-              <div className="flex justify-center">
-                <Button 
-                  onClick={() => setShowScriptPlayer(!showScriptPlayer)}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  {showScriptPlayer ? 'Hide Script Player' : 'Show Script Player'}
-                </Button>
-              </div>
             </div>
           ) : sessionState === StreamingAvatarSessionState.INACTIVE ? (
             <div className="flex flex-row gap-4">
@@ -207,11 +196,6 @@ function InteractiveAvatar() {
           )}
         </div>
       </div>
-      
-      {/* Script Player */}
-      {sessionState === StreamingAvatarSessionState.CONNECTED && showScriptPlayer && (
-        <ScriptPlayer script={PRESENTATION_SCRIPT} />
-      )}
       
       {sessionState === StreamingAvatarSessionState.CONNECTED && (
         <MessageHistory />

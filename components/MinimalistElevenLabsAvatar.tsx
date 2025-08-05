@@ -17,7 +17,6 @@ import { useMemoizedFn, useUnmount } from "ahooks";
 import { Button } from "./Button";
 import { LoadingIcon } from "./Icons";
 import { HeyGenPuppet } from "./HeyGenPuppet";
-import { PRESENTATION_SCRIPT, ScriptMessage } from "./scriptData";
 
 import {
   ElevenLabsConversationService,
@@ -41,13 +40,6 @@ enum ConversationState {
   ERROR = "error",
 }
 
-enum ScriptPlaybackState {
-  IDLE = "idle",
-  PLAYING = "playing",
-  PAUSED = "paused",
-  COMPLETED = "completed",
-}
-
 function MinimalistElevenLabsAvatarComponent({
   agentId,
   apiKey,
@@ -65,14 +57,6 @@ function MinimalistElevenLabsAvatarComponent({
   const [isElevenLabsListening, setIsElevenLabsListening] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
 
-  // Script playback state
-  const [scriptPlaybackState, setScriptPlaybackState] = useState<ScriptPlaybackState>(
-    ScriptPlaybackState.IDLE
-  );
-  const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
-  const [currentScriptMessage, setCurrentScriptMessage] = useState<ScriptMessage | null>(null);
-  const [scriptProgress, setScriptProgress] = useState(0);
-
   const conversationServiceRef = useRef<ElevenLabsConversationService | null>(
     null,
   );
@@ -80,18 +64,6 @@ function MinimalistElevenLabsAvatarComponent({
   const analyserRef = useRef<AnalyserNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const scriptTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const scriptPlaybackStateRef = useRef<ScriptPlaybackState>(ScriptPlaybackState.IDLE);
-  const currentScriptIndexRef = useRef<number>(0);
-
-  // Update refs when state changes
-  useEffect(() => {
-    scriptPlaybackStateRef.current = scriptPlaybackState;
-  }, [scriptPlaybackState]);
-
-  useEffect(() => {
-    currentScriptIndexRef.current = currentScriptIndex;
-  }, [currentScriptIndex]);
 
   /**
    * Audio level monitoring for visual feedback
@@ -161,176 +133,6 @@ function MinimalistElevenLabsAvatarComponent({
       console.error("Error initializing audio monitoring:", error);
     }
   }, [monitorAudio]);
-
-  /**
-   * Script playback functions
-   */
-  const startScriptPlayback = useMemoizedFn(async () => {
-    if (scriptPlaybackStateRef.current !== ScriptPlaybackState.IDLE && scriptPlaybackStateRef.current !== ScriptPlaybackState.COMPLETED) {
-      console.warn("⚠️ Script playback already active");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setScriptPlaybackState(ScriptPlaybackState.PLAYING);
-      setCurrentScriptIndex(0);
-      currentScriptIndexRef.current = 0;
-      setScriptProgress(0);
-
-      // Initialize HeyGen puppet if not already done
-      if ((window as any).heygenPuppet?.initialize) {
-        try {
-          await (window as any).heygenPuppet.initialize();
-        } catch (error) {
-          console.error("❌ Error initializing HeyGen puppet:", error);
-          throw error;
-        }
-      }
-
-      // Start playing the script
-      await playNextScriptMessage();
-      setIsLoading(false);
-    } catch (error) {
-      console.error("❌ Failed to start script playback:", error);
-      setScriptPlaybackState(ScriptPlaybackState.IDLE);
-      setIsLoading(false);
-    }
-  });
-
-  const stopScriptPlayback = useMemoizedFn(async () => {
-    try {
-      setScriptPlaybackState(ScriptPlaybackState.IDLE);
-      setCurrentScriptIndex(0);
-      currentScriptIndexRef.current = 0;
-      setCurrentScriptMessage(null);
-      setScriptProgress(0);
-
-      // Clear any pending timeouts
-      if (scriptTimeoutRef.current) {
-        clearTimeout(scriptTimeoutRef.current);
-        scriptTimeoutRef.current = null;
-      }
-
-      // Stop HeyGen puppet if it's speaking
-      if ((window as any).heygenPuppet?.interrupt) {
-        try {
-          await (window as any).heygenPuppet.interrupt();
-        } catch (error) {
-          console.error("❌ Error interrupting HeyGen puppet:", error);
-        }
-      }
-    } catch (error) {
-      console.error("❌ Error stopping script playback:", error);
-    }
-  });
-
-  const playNextScriptMessage = useCallback(async () => {
-    if (currentScriptIndexRef.current >= PRESENTATION_SCRIPT.length) {
-      // Script completed
-      setScriptPlaybackState(ScriptPlaybackState.COMPLETED);
-      setCurrentScriptMessage(null);
-      setScriptProgress(100);
-      return;
-    }
-
-    const message = PRESENTATION_SCRIPT[currentScriptIndexRef.current];
-    setCurrentScriptMessage(message);
-    setScriptProgress((currentScriptIndexRef.current / PRESENTATION_SCRIPT.length) * 100);
-
-    if (message.speaker === 'Jujo') {
-      // Jujo speaks - use HeyGen puppet
-      try {
-        console.log(`🎬 Playing Jujo message ${currentScriptIndexRef.current + 1}/${PRESENTATION_SCRIPT.length}: ${message.text}`);
-        
-        // Check if puppet is ready
-        if (!(window as any).heygenPuppet?.speak) {
-          console.error("❌ HeyGen puppet not ready");
-          // Continue to next message even if there's an error
-          scriptTimeoutRef.current = setTimeout(() => {
-            const nextIndex = currentScriptIndexRef.current + 1;
-            setCurrentScriptIndex(nextIndex);
-            currentScriptIndexRef.current = nextIndex;
-            if (scriptPlaybackStateRef.current === ScriptPlaybackState.PLAYING) {
-              playNextScriptMessage();
-            }
-          }, 1000);
-          return;
-        }
-
-        // Start speaking
-        await (window as any).heygenPuppet.speak(message.text);
-        
-        // Calculate estimated speaking time: ~150 words per minute = ~0.4 seconds per word
-        const wordCount = message.text.split(' ').length;
-        const estimatedSpeakingTime = Math.max(2, wordCount * 0.4 * 1000); // Convert to milliseconds, minimum 2 seconds
-        
-        console.log(`🎬 Jujo started speaking message ${currentScriptIndexRef.current + 1}, estimated duration: ${estimatedSpeakingTime}ms`);
-        
-        // Wait for the estimated speaking time before proceeding
-        scriptTimeoutRef.current = setTimeout(() => {
-          console.log(`🎬 Jujo finished speaking message ${currentScriptIndexRef.current + 1}`);
-          const nextIndex = currentScriptIndexRef.current + 1;
-          setCurrentScriptIndex(nextIndex);
-          currentScriptIndexRef.current = nextIndex;
-          if (scriptPlaybackStateRef.current === ScriptPlaybackState.PLAYING) {
-            playNextScriptMessage();
-          }
-        }, estimatedSpeakingTime);
-      } catch (error) {
-        console.error("❌ Error playing Jujo message:", error);
-        // Continue to next message even if there's an error
-        scriptTimeoutRef.current = setTimeout(() => {
-          const nextIndex = currentScriptIndexRef.current + 1;
-          setCurrentScriptIndex(nextIndex);
-          currentScriptIndexRef.current = nextIndex;
-          if (scriptPlaybackStateRef.current === ScriptPlaybackState.PLAYING) {
-            playNextScriptMessage();
-          }
-        }, 1000);
-      }
-    } else {
-      // Rogelio speaks - wait for user to speak
-      console.log(`🎬 Waiting for Rogelio to speak ${currentScriptIndexRef.current + 1}/${PRESENTATION_SCRIPT.length}: ${message.text}`);
-      
-      // Calculate wait time: 1 second per 2 words
-      const wordCount = message.text.split(' ').length;
-      const waitTime = Math.max(3, Math.ceil(wordCount / 2)); // Minimum 3 seconds
-      
-      console.log(`⏱️ Rogelio message has ${wordCount} words, waiting ${waitTime} seconds`);
-      
-      scriptTimeoutRef.current = setTimeout(() => {
-        const nextIndex = currentScriptIndexRef.current + 1;
-        setCurrentScriptIndex(nextIndex);
-        currentScriptIndexRef.current = nextIndex;
-        if (scriptPlaybackStateRef.current === ScriptPlaybackState.PLAYING) {
-          playNextScriptMessage();
-        }
-      }, waitTime * 1000);
-    }
-  }, []);
-
-  const pauseScriptPlayback = useMemoizedFn(() => {
-    if (scriptPlaybackState === ScriptPlaybackState.PLAYING) {
-      setScriptPlaybackState(ScriptPlaybackState.PAUSED);
-      
-      // Clear any pending timeouts
-      if (scriptTimeoutRef.current) {
-        clearTimeout(scriptTimeoutRef.current);
-        scriptTimeoutRef.current = null;
-      }
-    }
-  });
-
-  const resumeScriptPlayback = useMemoizedFn(async () => {
-    if (scriptPlaybackState === ScriptPlaybackState.PAUSED) {
-      setScriptPlaybackState(ScriptPlaybackState.PLAYING);
-      // Use setTimeout to ensure state is updated before calling playNextScriptMessage
-      setTimeout(() => {
-        playNextScriptMessage();
-      }, 0);
-    }
-  });
 
   /**
    * ElevenLabs conversation event handlers
@@ -523,30 +325,10 @@ function MinimalistElevenLabsAvatarComponent({
    * Cleanup on unmount
    */
   useUnmount(() => {
-    if (conversationServiceRef.current) {
-      conversationServiceRef.current.stopConversation();
-    }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
     }
-    if (scriptTimeoutRef.current) {
-      clearTimeout(scriptTimeoutRef.current);
-    }
   });
-
-  // Script playback state changes
-  useEffect(() => {
-    if (scriptPlaybackState === ScriptPlaybackState.IDLE) {
-      // Clean up any pending timeouts when stopping
-      if (scriptTimeoutRef.current) {
-        clearTimeout(scriptTimeoutRef.current);
-        scriptTimeoutRef.current = null;
-      }
-    }
-  }, [scriptPlaybackState]);
 
   /**
    * Render conversation status
@@ -576,62 +358,6 @@ function MinimalistElevenLabsAvatarComponent({
       default:
         return null;
     }
-  };
-
-  /**
-   * Render script playback status
-   */
-  const renderScriptStatus = () => {
-    switch (scriptPlaybackState) {
-      case ScriptPlaybackState.PLAYING:
-        return (
-          <div className="text-blue-400 text-xs sm:text-sm">
-            🎬 Playing Script... ({Math.round(scriptProgress)}%)
-          </div>
-        );
-      case ScriptPlaybackState.PAUSED:
-        return (
-          <div className="text-yellow-400 text-xs sm:text-sm">
-            ⏸️ Script Paused
-          </div>
-        );
-      case ScriptPlaybackState.COMPLETED:
-        return (
-          <div className="text-green-400 text-xs sm:text-sm">
-            ✅ Script Completed
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  /**
-   * Render current script message
-   */
-  const renderCurrentScriptMessage = () => {
-    if (!currentScriptMessage) return null;
-
-    // Calculate wait time for Rogelio messages
-    const waitTime = currentScriptMessage.speaker === 'Rogelio' 
-      ? Math.max(3, Math.ceil(currentScriptMessage.text.split(' ').length / 2))
-      : null;
-
-    return (
-      <div className="w-full max-w-md bg-black bg-opacity-30 rounded-lg p-3 text-xs text-white">
-        <div className="mb-2">
-          <strong>{currentScriptMessage.speaker}:</strong>
-        </div>
-        <div className="text-sm">
-          {currentScriptMessage.text}
-        </div>
-        {currentScriptMessage.speaker === 'Rogelio' && waitTime && (
-          <div className="mt-2 text-xs text-yellow-300">
-            ⏱️ Tiempo estimado: {waitTime} segundos ({currentScriptMessage.text.split(' ').length} palabras)
-          </div>
-        )}
-      </div>
-    );
   };
 
   /**
@@ -697,7 +423,7 @@ function MinimalistElevenLabsAvatarComponent({
             className="w-full h-full object-contain"
             src="/JUJO_FRAME.webp"
             style={{
-              transform: "rotate(90deg) scale(1.39)",
+              transform: "rotate(90deg) scale(1.30)",
             }}
           />
         </div>
@@ -725,62 +451,12 @@ function MinimalistElevenLabsAvatarComponent({
         {conversationState === ConversationState.INACTIVE && !isLoading ? (
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <Button
-              className="px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-medium w-full"
+              className="px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-medium w-full mt-2"
               onClick={startConversation}
             >
               Comenzar Conversación
             </Button>
-            <Button
-              className="px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-medium w-full bg-blue-600 hover:bg-blue-700"
-              onClick={startScriptPlayback}
-              disabled={scriptPlaybackState !== ScriptPlaybackState.IDLE && scriptPlaybackState !== ScriptPlaybackState.COMPLETED}
-            >
-              🎬 Reproducir Guión
-            </Button>
             
-            {/* Script controls when conversation is inactive but script is playing */}
-            {scriptPlaybackState !== ScriptPlaybackState.IDLE && (
-              <div className="flex flex-col items-center gap-2 mt-4">
-                {renderScriptStatus()}
-                {renderCurrentScriptMessage()}
-                
-                <div className="flex items-center justify-center gap-2">
-                  {/* Script Play/Pause Button */}
-                  <button
-                    className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 border-2 border-blue-600"
-                    title={scriptPlaybackState === ScriptPlaybackState.PLAYING ? "Pausar script" : "Reproducir script"}
-                    onClick={scriptPlaybackState === ScriptPlaybackState.PLAYING ? pauseScriptPlayback : resumeScriptPlayback}
-                  >
-                    <svg
-                      className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      {scriptPlaybackState === ScriptPlaybackState.PLAYING ? (
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                      ) : (
-                        <path d="M8 5v14l11-7z"/>
-                      )}
-                    </svg>
-                  </button>
-
-                  {/* Stop Script Button */}
-                  <button
-                    className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all duration-200 border-2 border-orange-600"
-                    title="Detener script"
-                    onClick={stopScriptPlayback}
-                  >
-                    <svg
-                      className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M6 6h12v12H6z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         ) : isLoading || conversationState === ConversationState.CONNECTING ? (
           <div className="flex items-center gap-2 text-white mt-4 sm:mt-3 text-sm sm:text-base">
@@ -790,8 +466,6 @@ function MinimalistElevenLabsAvatarComponent({
         ) : (
           <div className="flex flex-col items-center gap-3 sm:gap-2 mt-4 sm:mt-3 w-full">
             {renderStatus()}
-            {renderScriptStatus()}
-            {renderCurrentScriptMessage()}
 
             {/* Control Buttons */}
             <div className="flex items-center justify-center gap-2 sm:gap-3 w-full">
@@ -818,44 +492,6 @@ function MinimalistElevenLabsAvatarComponent({
                   <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                 </svg>
               </button>
-
-              {/* Script Play/Pause Button */}
-              {scriptPlaybackState !== ScriptPlaybackState.IDLE && (
-                <button
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 border-2 border-blue-600"
-                  title={scriptPlaybackState === ScriptPlaybackState.PLAYING ? "Pausar script" : "Reproducir script"}
-                  onClick={scriptPlaybackState === ScriptPlaybackState.PLAYING ? pauseScriptPlayback : resumeScriptPlayback}
-                >
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {scriptPlaybackState === ScriptPlaybackState.PLAYING ? (
-                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                    ) : (
-                      <path d="M8 5v14l11-7z"/>
-                    )}
-                  </svg>
-                </button>
-              )}
-
-              {/* Stop Script Button */}
-              {scriptPlaybackState !== ScriptPlaybackState.IDLE && (
-                <button
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-600 hover:bg-orange-700 flex items-center justify-center transition-all duration-200 border-2 border-orange-600"
-                  title="Detener script"
-                  onClick={stopScriptPlayback}
-                >
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 6h12v12H6z"/>
-                  </svg>
-                </button>
-              )}
 
               {/* End Call Button */}
               <button
