@@ -66,73 +66,105 @@ function MinimalistElevenLabsAvatarComponent({
   const animationFrameRef = useRef<number | null>(null);
 
   /**
-   * Audio level monitoring for visual feedback
+   * Start audio monitoring when conversation is active and microphone is enabled
    */
-  const monitorAudio = useCallback(() => {
-    if (
-      !analyserRef.current ||
-      isMuted ||
-      conversationState !== ConversationState.LISTENING
-    ) {
+  useEffect(() => {
+    const shouldMonitor = conversationState !== ConversationState.INACTIVE && !isMuted;
+    
+    if (shouldMonitor) {
+      // Start monitoring
+      const startMonitoring = async () => {
+        try {
+          console.log("🎤 Starting audio monitoring...");
+          
+          // Stop any existing monitoring
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+          }
+
+          if (!mediaStreamRef.current) {
+            mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                sampleRate: 16000,
+                channelCount: 1,
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+              },
+            });
+          }
+
+          if (!audioContextRef.current) {
+            audioContextRef.current = new AudioContext();
+          }
+
+          if (!analyserRef.current) {
+            const source = audioContextRef.current.createMediaStreamSource(
+              mediaStreamRef.current,
+            );
+
+            analyserRef.current = audioContextRef.current.createAnalyser();
+            analyserRef.current.fftSize = 256;
+            analyserRef.current.smoothingTimeConstant = 0.8;
+            source.connect(analyserRef.current);
+          }
+
+          // Start monitoring loop
+          const monitorLoop = () => {
+            if (!analyserRef.current || isMuted) {
+              setAudioLevel(0);
+              setIsUserSpeaking(false);
+              if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+              }
+              return;
+            }
+
+            const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+            analyserRef.current.getByteFrequencyData(dataArray);
+
+            // Calculate RMS (Root Mean Square) for better volume detection
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+              sum += dataArray[i] * dataArray[i];
+            }
+            const rms = Math.sqrt(sum / dataArray.length);
+            const volume = rms;
+
+            setAudioLevel(volume);
+
+            // Detect if user is speaking (lower threshold for better sensitivity)
+            const isSpeaking = volume > 5; // Reduced threshold from 10 to 5 for better sensitivity
+
+            // Debug logging (only when speaking to avoid spam)
+            if (isSpeaking && !isUserSpeaking) {
+              console.log(`🎤 Audio detected: volume=${volume.toFixed(2)}, threshold=5`);
+            }
+
+            setIsUserSpeaking(isSpeaking);
+
+            animationFrameRef.current = requestAnimationFrame(monitorLoop);
+          };
+
+          monitorLoop();
+        } catch (error) {
+          console.error("Error initializing audio monitoring:", error);
+        }
+      };
+
+      startMonitoring();
+    } else {
+      // Stop monitoring when conversation is inactive or muted
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
       setAudioLevel(0);
       setIsUserSpeaking(false);
-      animationFrameRef.current = requestAnimationFrame(monitorAudio);
-
-      return;
     }
-
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-
-    analyserRef.current.getByteFrequencyData(dataArray);
-
-    const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-
-    setAudioLevel(volume);
-
-    // Detect if user is speaking (volume threshold)
-    const isSpeaking = volume > 20; // Adjust threshold as needed
-
-    setIsUserSpeaking(isSpeaking);
-
-    animationFrameRef.current = requestAnimationFrame(monitorAudio);
-  }, [isMuted, conversationState]);
-
-  /**
-   * Initialize audio monitoring for visual feedback
-   */
-  const initAudioMonitoring = useCallback(async () => {
-    try {
-      if (!mediaStreamRef.current) {
-        mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            sampleRate: 16000,
-            channelCount: 1,
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
-        });
-      }
-
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext();
-      }
-
-      if (!analyserRef.current) {
-        const source = audioContextRef.current.createMediaStreamSource(
-          mediaStreamRef.current,
-        );
-
-        analyserRef.current = audioContextRef.current.createAnalyser();
-        analyserRef.current.fftSize = 256;
-        source.connect(analyserRef.current);
-      }
-
-      monitorAudio();
-    } catch (error) {
-      console.error("Error initializing audio monitoring:", error);
-    }
-  }, [monitorAudio]);
+  }, [conversationState, isMuted]);
 
   /**
    * ElevenLabs conversation event handlers
@@ -173,8 +205,7 @@ function MinimalistElevenLabsAvatarComponent({
   const handleConnect = useCallback(() => {
     setConversationState(ConversationState.LISTENING);
     setIsElevenLabsListening(true);
-    initAudioMonitoring();
-  }, [initAudioMonitoring]);
+  }, []);
 
   const handleDisconnect = useCallback(() => {
     setConversationState(ConversationState.INACTIVE);
@@ -325,9 +356,26 @@ function MinimalistElevenLabsAvatarComponent({
    * Cleanup on unmount
    */
   useUnmount(() => {
+    // Stop animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    // Stop media stream
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
     }
+
+    // Close audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    // Clear analyser
+    analyserRef.current = null;
   });
 
   /**
@@ -342,9 +390,7 @@ function MinimalistElevenLabsAvatarComponent({
       className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-200 border-2 ${
         isMuted
           ? "bg-red-500 border-red-500 hover:bg-red-600"
-          : isUserSpeaking
-            ? "bg-green-500 border-green-500"
-            : "bg-white border-gray-300 hover:border-gray-400"
+          : "bg-white border-gray-300 hover:border-gray-400"
       }`}
       title={
         isUserSpeaking
@@ -355,31 +401,33 @@ function MinimalistElevenLabsAvatarComponent({
       }
       onClick={handleMuteToggle}
     >
-      <div className="flex items-end gap-0.5 h-2 sm:h-3 md:h-4">
-        {[1, 2, 3, 4].map((bar) => (
-          <div
-            key={bar}
-            className={`w-0.5 sm:w-0.5 md:w-1 rounded-full transition-all duration-100 ${
-              isMuted
-                ? "bg-white"
-                : isUserSpeaking
+      <div className="flex items-end gap-0.5 h-4 sm:h-5 md:h-6 -mt-1">
+        {[1, 2, 3, 4].map((bar) => {
+          // Adjust thresholds for RMS values (RMS typically ranges 0-128)
+          const threshold = bar * 3; // Reduced from 4 to 3 for better sensitivity
+          const isActive = audioLevel > threshold;
+          
+          return (
+            <div
+              key={bar}
+              className={`w-0.5 sm:w-0.5 md:w-1 rounded-full transition-all duration-100 ${
+                isMuted
                   ? "bg-white"
-                  : audioLevel > bar * 15
+                  : isActive
                     ? "bg-green-500"
                     : "bg-gray-400"
-            }`}
-            style={{
-              height: `${bar * 1.5}px`,
-              opacity: isMuted
-                ? 0.8
-                : isUserSpeaking
-                  ? 1
-                  : audioLevel > bar * 15
+              }`}
+              style={{
+                height: `${bar * 4}px`, // Increased from 2.5 to 4 for taller bars
+                opacity: isMuted
+                  ? 0.8
+                  : isActive
                     ? 1
                     : 0.4,
-            }}
-          />
-        ))}
+              }}
+            />
+          );
+        })}
       </div>
     </button>
   );
@@ -473,7 +521,7 @@ function MinimalistElevenLabsAvatarComponent({
                 onClick={stopConversation}
               >
                 <svg
-                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white rotate-180"
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
