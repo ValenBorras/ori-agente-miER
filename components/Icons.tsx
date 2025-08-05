@@ -219,13 +219,91 @@ export function CloseIcon({
     <svg
       fill="none"
       height={size || height}
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={size || width}
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <path
-        d="M15.7135 3.43055C15.8086 3.46146 15.8911 3.54396 16.0562 3.70897L16.2919 3.94467C16.4569 4.10968 16.5394 4.19218 16.5703 4.28732C16.5975 4.37101 16.5975 4.46115 16.5703 4.54484C16.5394 4.63997 16.4569 4.72248 16.2919 4.88748L11.1785 10.0008L16.2918 15.1141C16.4568 15.2791 16.5393 15.3616 16.5702 15.4568C16.5974 15.5404 16.5974 15.6306 16.5702 15.7143C16.5393 15.8094 16.4568 15.8919 16.2918 16.0569L16.0561 16.2926C15.8911 16.4576 15.8086 16.5401 15.7135 16.571C15.6298 16.5982 15.5396 16.5982 15.4559 16.571C15.3608 16.5401 15.2783 16.4576 15.1133 16.2926L10 11.1793L4.8868 16.2925C4.7218 16.4575 4.63929 16.5401 4.54415 16.571C4.46047 16.5982 4.37032 16.5982 4.28664 16.571C4.1915 16.5401 4.109 16.4575 3.94399 16.2925L3.70829 16.0568C3.54328 15.8918 3.46078 15.8093 3.42987 15.7142C3.40267 15.6305 3.40267 15.5404 3.42987 15.4567C3.46078 15.3615 3.54328 15.279 3.70829 15.114L8.8215 10.0008L3.70824 4.88756C3.54323 4.72255 3.46073 4.64005 3.42982 4.54491C3.40263 4.46123 3.40263 4.37108 3.42982 4.2874C3.46073 4.19226 3.54323 4.10976 3.70824 3.94475L3.94394 3.70905C4.10895 3.54404 4.19145 3.46154 4.28659 3.43062C4.37027 3.40343 4.46042 3.40343 4.5441 3.43062C4.63924 3.46154 4.72174 3.54404 4.88675 3.70905L10 8.82231L15.1133 3.70897C15.2784 3.54396 15.3609 3.46146 15.456 3.43055C15.5397 3.40336 15.6298 3.40336 15.7135 3.43055Z"
+        d="M18 6L6 18M6 6L18 18"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+      />
+    </svg>
+  );
+}
+
+export function PlayIcon({
+  size = 24,
+  width,
+  height,
+  className,
+  ...props
+}: IconSvgProps) {
+  return (
+    <svg
+      fill="none"
+      height={size || height}
+      viewBox="0 0 24 24"
+      width={size || width}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path
+        d="M8 5v14l11-7z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export function PauseIcon({
+  size = 24,
+  width,
+  height,
+  className,
+  ...props
+}: IconSvgProps) {
+  return (
+    <svg
+      fill="none"
+      height={size || height}
+      viewBox="0 0 24 24"
+      width={size || width}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path
+        d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export function StopIcon({
+  size = 24,
+  width,
+  height,
+  className,
+  ...props
+}: IconSvgProps) {
+  return (
+    <svg
+      fill="none"
+      height={size || height}
+      viewBox="0 0 24 24"
+      width={size || width}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path
+        d="M6 6h12v12H6V6z"
         fill="currentColor"
       />
     </svg>

@@ -175,11 +175,6 @@ function MinimalistAvatarWithMicrophone() {
               Audio Level:{" "}
               <span className="font-mono">{audioLevel.toFixed(1)}%</span>
             </div>
-            {audioLevel > 20 && !isMuted && (
-              <div className="text-xs text-green-500 animate-pulse">
-                Speaking...
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -196,7 +191,7 @@ function MinimalistAvatarWithMicrophone() {
         ) : isLoading ? (
           <div className="flex items-center gap-2 text-white">
             <LoadingIcon />
-            <span>Conectando...</span>
+            <span>Conectando con JUJO</span>
           </div>
         ) : sessionState === StreamingAvatarSessionState.CONNECTED ? (
           <div className="flex flex-col items-center gap-3">

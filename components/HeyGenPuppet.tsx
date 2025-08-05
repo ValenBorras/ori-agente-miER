@@ -361,22 +361,6 @@ function HeyGenPuppetComponent({
         </div>
       )}
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-white">
-            <LoadingIcon />
-            <span>Initializing puppet...</span>
-          </div>
-        </div>
-      )}
-
-      {/* Speaking Indicator */}
-      {isSpeaking && (
-        <div className="absolute bottom-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
-          Speaking...
-        </div>
-      )}
     </div>
   );
 }

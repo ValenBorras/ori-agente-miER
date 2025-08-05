@@ -226,7 +226,7 @@ export const ChromaKeyAvatar = forwardRef<
           !processorState.isProcessing &&
           !processorState.error && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-white text-sm">Conectando con JUJO...</div>
+              <div className="text-white text-sm">Conectando con JUJO</div>
             </div>
           )}
       </div>

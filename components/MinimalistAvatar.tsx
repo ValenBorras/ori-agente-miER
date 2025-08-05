@@ -381,7 +381,7 @@ function MinimalistAvatar() {
         ) : isLoading ? (
           <div className="flex items-center gap-2 text-white mt-6 sm:mt-4 text-sm sm:text-base">
             <LoadingIcon />
-            <span>Conectando...</span>
+            <span>Conectando con JUJO</span>
           </div>
         ) : sessionState === StreamingAvatarSessionState.CONNECTED ? (
           <div className="flex flex-col items-center gap-4 sm:gap-3 mt-6 sm:mt-4 w-full">
