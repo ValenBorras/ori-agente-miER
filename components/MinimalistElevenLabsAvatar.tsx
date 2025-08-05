@@ -371,7 +371,7 @@ function MinimalistElevenLabsAvatarComponent({
    */
   const renderAudioIndicator = () => (
     <button
-      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 border-2 ${
+      className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-200 border-2 ${
         isMuted
           ? "bg-red-500 border-red-500 hover:bg-red-600"
           : isUserSpeaking
@@ -387,11 +387,11 @@ function MinimalistElevenLabsAvatarComponent({
       }
       onClick={handleMuteToggle}
     >
-      <div className="flex items-end gap-0.5 h-3 sm:h-4">
+      <div className="flex items-end gap-0.5 h-2 sm:h-3 md:h-4">
         {[1, 2, 3, 4].map((bar) => (
           <div
             key={bar}
-            className={`w-0.5 sm:w-1 rounded-full transition-all duration-100 ${
+            className={`w-0.5 sm:w-0.5 md:w-1 rounded-full transition-all duration-100 ${
               isMuted
                 ? "bg-white"
                 : isUserSpeaking
@@ -401,7 +401,7 @@ function MinimalistElevenLabsAvatarComponent({
                     : "bg-gray-400"
             }`}
             style={{
-              height: `${bar * 2}px`,
+              height: `${bar * 1.5}px`,
               opacity: isMuted
                 ? 0.8
                 : isUserSpeaking
@@ -418,10 +418,10 @@ function MinimalistElevenLabsAvatarComponent({
 
   return (
     <div
-      className={`w-full flex flex-col items-center justify-center gap-4 sm:gap-6 px-4 sm:px-0 ${className}`}
+      className={`w-full flex flex-col items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0 ${className}`}
     >
       {/* Avatar Container with Frame */}
-      <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg aspect-[5/6] flex flex-col items-center justify-center">
+      <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[5/6] flex flex-col items-center justify-center">
         {/* Frame Overlay */}
         <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
           <img
@@ -429,7 +429,7 @@ function MinimalistElevenLabsAvatarComponent({
             className="w-full h-full object-contain"
             src="/JUJO_FRAME.webp"
             style={{
-              transform: "rotate(90deg) scale(1.44)",
+              transform: "rotate(90deg) scale(1.39)",
             }}
           />
         </div>
@@ -471,21 +471,21 @@ function MinimalistElevenLabsAvatarComponent({
       </div>
 
       {/* Control Panel */}
-      <div className="flex justify-center w-full px-4 sm:px-0">
+      <div className="flex justify-center w-full px-4 sm:px-0 mt-2">
         {conversationState === ConversationState.INACTIVE && !isLoading ? (
           <Button
-            className="px-6 sm:px-8 py-3 sm:py-3 text-base sm:text-lg font-medium mt-6 sm:mt-4 w-full max-w-xs"
+            className="px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-medium mt-4 sm:mt-3 w-full max-w-xs"
             onClick={startConversation}
           >
             Comenzar Conversación
           </Button>
         ) : isLoading || conversationState === ConversationState.CONNECTING ? (
-          <div className="flex items-center gap-2 text-white mt-6 sm:mt-4 text-sm sm:text-base">
+          <div className="flex items-center gap-2 text-white mt-4 sm:mt-3 text-sm sm:text-base">
             <LoadingIcon />
             <span>Conectando con JUJO...</span>
           </div>
         ) : conversationState !== ConversationState.INACTIVE ? (
-          <div className="flex flex-col items-center gap-4 sm:gap-3 mt-6 sm:mt-4 w-full">
+          <div className="flex flex-col items-center gap-3 sm:gap-2 mt-4 sm:mt-3 w-full">
             {renderStatus()}
 
             {/* Control Buttons */}
@@ -495,7 +495,7 @@ function MinimalistElevenLabsAvatarComponent({
 
               {/* Microphone Button */}
               <button
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 border-2 ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-200 border-2 ${
                   isMuted
                     ? "bg-red-500 border-red-500 hover:bg-red-600"
                     : "bg-white border-gray-300 hover:border-gray-400"
@@ -503,7 +503,7 @@ function MinimalistElevenLabsAvatarComponent({
                 onClick={handleMuteToggle}
               >
                 <svg
-                  className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${
                     isMuted ? "text-white" : "text-gray-700"
                   }`}
                   fill="currentColor"
@@ -516,12 +516,12 @@ function MinimalistElevenLabsAvatarComponent({
 
               {/* End Call Button */}
               <button
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all duration-200 border-2 border-red-600"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all duration-200 border-2 border-red-600"
                 title="Terminar conversación"
                 onClick={stopConversation}
               >
                 <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-white rotate-180"
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white rotate-180"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -531,7 +531,7 @@ function MinimalistElevenLabsAvatarComponent({
 
               {/* Restart Button (for stuck sessions) */}
               <button
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 border-2 border-blue-600"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 border-2 border-blue-600"
                 title="Reiniciar conversación"
                 onClick={() => {
                   console.log("🔄 Manual restart requested");
@@ -542,7 +542,7 @@ function MinimalistElevenLabsAvatarComponent({
                 }}
               >
                 <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -558,7 +558,7 @@ function MinimalistElevenLabsAvatarComponent({
 
               {/* Force Close Button (for stuck HeyGen sessions) */}
               <button
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-800 hover:bg-red-900 flex items-center justify-center transition-all duration-200 border-2 border-red-800"
+                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-red-800 hover:bg-red-900 flex items-center justify-center transition-all duration-200 border-2 border-red-800"
                 title="Forzar cierre (emergencia)"
                 onClick={() => {
                   console.log("🛑 Force closing all sessions");
@@ -577,7 +577,7 @@ function MinimalistElevenLabsAvatarComponent({
                 }}
               >
                 <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

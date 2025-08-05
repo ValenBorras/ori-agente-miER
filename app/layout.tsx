@@ -37,12 +37,14 @@ export default function RootLayout({
       lang="en"
     >
       <head />
-      <body className="min-h-screen bg-image-background text-slate-700 overflow-x-hidden">
-        <main className="relative flex flex-col gap-6 min-h-screen w-full">
+      <body className="h-screen bg-image-background text-slate-700 overflow-hidden">
+        <div className="h-full flex flex-col">
           <NavBar />
-          {children}
-        </main>
-        <Footer />
+          <main className="flex-1 flex items-center justify-center overflow-hidden">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
