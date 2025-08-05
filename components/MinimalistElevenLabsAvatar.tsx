@@ -333,33 +333,7 @@ function MinimalistElevenLabsAvatarComponent({
   /**
    * Render conversation status
    */
-  const renderStatus = () => {
-    switch (conversationState) {
-      case ConversationState.LISTENING:
-        return (
-          <div className="text-green-400 text-xs sm:text-sm">
-            ✓ Listening...
-          </div>
-        );
-      case ConversationState.PROCESSING:
-        return (
-          <div className="text-blue-400 text-xs sm:text-sm">
-            🧠 Processing...
-          </div>
-        );
-      case ConversationState.RESPONDING:
-        return (
-          <div className="text-purple-400 text-xs sm:text-sm">
-            💬 Responding...
-          </div>
-        );
-      case ConversationState.ERROR:
-        return <div className="text-red-400 text-xs sm:text-sm">❌ Error</div>;
-      default:
-        return null;
-    }
-  };
-
+  
   /**
    * Render audio level indicator
    */
@@ -465,7 +439,6 @@ function MinimalistElevenLabsAvatarComponent({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 sm:gap-2 mt-4 sm:mt-3 w-full">
-            {renderStatus()}
 
             {/* Control Buttons */}
             <div className="flex items-center justify-center gap-2 sm:gap-3 w-full">
@@ -508,22 +481,6 @@ function MinimalistElevenLabsAvatarComponent({
                 </svg>
               </button>
             </div>
-
-            {/* Last Messages Display */}
-            {(lastUserMessage || lastAgentMessage) && (
-              <div className="w-full max-w-md bg-black bg-opacity-30 rounded-lg p-3 text-xs text-white">
-                {lastUserMessage && (
-                  <div className="mb-2">
-                    <strong>Usuario:</strong> {lastUserMessage}
-                  </div>
-                )}
-                {lastAgentMessage && (
-                  <div>
-                    <strong>JUJO:</strong> {lastAgentMessage}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>
