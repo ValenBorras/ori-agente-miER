@@ -62,7 +62,7 @@ export const PRESENTATION_SCRIPT: ScriptMessage[] = [
   {
     id: '11',
     speaker: 'Jujo',
-    text: 'Entrá a www.mientrerios.gob.ar, registrate y convertite en ciudadano digital. Hacé tus trámites desde cualquier lugar y ayudanos a construir juntos una Entre Ríos más moderna y sin papeles.'
+    text: 'Entrá a dobleve dobleve dobleve punto Mi Entre Rios punto gob punto ar, registrate y convertite en ciudadano digital. Hacé tus trámites desde cualquier lugar y ayudanos a construir juntos una Entre Ríos más moderna y sin papeles.'
   },
   {
     id: '12',
