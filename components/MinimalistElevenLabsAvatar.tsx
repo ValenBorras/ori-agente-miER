@@ -415,7 +415,7 @@ function MinimalistElevenLabsAvatarComponent({
       className={`w-full flex flex-col items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0 ${className}`}
     >
       {/* Avatar Container with Frame */}
-      <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[5/6] flex flex-col items-center justify-center">
+      <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg-max-w-lg aspect-[5/6] flex flex-col items-center justify-center">
         {/* Frame Overlay */}
         <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
           <img
@@ -430,7 +430,7 @@ function MinimalistElevenLabsAvatarComponent({
 
         {/* HeyGen Puppet Container */}
         <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-          <div className="w-[85%] h-[85%] overflow-hidden rounded-lg">
+          <div className="w-[80%] h-[80%] overflow-hidden rounded-lg">
             <HeyGenPuppet
               className="rounded-lg"
               onError={handlePuppetError}
