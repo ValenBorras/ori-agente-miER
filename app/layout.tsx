@@ -17,8 +17,8 @@ const fontMono = FontMono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Demo JUJO Interactivo - Mi Entre Rios",
-    template: `%s - Demo JUJO Interactivo - Mi Entre Rios`,
+    default: "Demo Ori Interactiva - Cuidar Adolescencia - Mi Entre Rios",
+    template: `%s - Demo Ori Interactiva - Cuidar Adolescencia - Mi Entre Rios`,
   },
   icons: {
     icon: "/MiER-Cuadrado.png",

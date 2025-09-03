@@ -16,7 +16,7 @@ export default function NavBar() {
           </Link>
           <div className="bg-gradient-to-br from-lime-300 to-lime-600 bg-clip-text">
             <p className="text-md md:text-base lg:text-lg font-semibold text-transparent">
-              Demo JUJO Interactivo - Mi Entre Rios
+              Demo Ori Interactiva - Cuidar Adolescencia - Mi Entre Rios
             </p>
           </div>
         </div>
