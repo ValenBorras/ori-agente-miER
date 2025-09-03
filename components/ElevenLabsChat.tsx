@@ -94,12 +94,8 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
       
       setMode('voice');
       
-      // Add welcome message
-      setMessages([{
-        type: 'agent',
-        text: `¡Hola! Soy tu asistente virtual. Puedes hablar conmigo por micrófono.`,
-        timestamp: new Date()
-      }]);
+      // Start with empty messages - agent will provide its own welcome
+      setMessages([]);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start voice call');
@@ -128,12 +124,8 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
           type: "conversation_initiation_client_data"
         }));
         
-        // Add welcome message
-        setMessages([{
-          type: 'agent',
-          text: `¡Hola! Soy tu asistente virtual. Puedes escribir tus mensajes aquí.`,
-          timestamp: new Date()
-        }]);
+        // Start with empty messages - agent will provide its own welcome
+        setMessages([]);
       };
       
       ws.onmessage = (event) => {

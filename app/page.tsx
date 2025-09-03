@@ -9,7 +9,7 @@ export default function App() {
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Chat para Docentes */}
         <div className="flex flex-col items-center">
-          <div className="w-full h-[600px] py-10 px-10">
+          <div className="w-full h-[600px] py-3 px-10">
             <ElevenLabsChat 
               agentId="agent_6501k48f25taeztas78wnx0rpgxr"
               title="Asistente para Docentes"
@@ -19,7 +19,7 @@ export default function App() {
 
         {/* Chat para Padres */}
         <div className="flex flex-col items-center">
-          <div className="w-full h-[600px] py-10 px-10">
+          <div className="w-full h-[600px] py-3 px-10">
             <ElevenLabsChat 
               agentId="agent_6701k48e6gs2fdqte1q1ewwb0gsj"
               title="Asistente para Padres"
