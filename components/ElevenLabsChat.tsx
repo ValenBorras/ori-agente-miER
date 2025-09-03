@@ -34,7 +34,7 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
       setMode('idle');
       console.log('Disconnected from ElevenLabs conversation');
     },
-    onMessage: (message) => {
+    onMessage: (message: any) => {
       console.log('Received message:', message);
       
       // Handle different message types from the conversation
@@ -42,19 +42,19 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
         // User message (from voice or text)
         setMessages(prev => [...prev, {
           type: 'user',
-          text: message.message,
+          text: typeof message === 'string' ? message : message.message || '',
           timestamp: new Date()
         }]);
       } else if (message.source === 'ai') {
         // AI agent response
         setMessages(prev => [...prev, {
           type: 'agent',
-          text: message.message,
+          text: typeof message === 'string' ? message : message.message || '',
           timestamp: new Date()
         }]);
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setError(error.message || 'An error occurred');
       console.error('ElevenLabs conversation error:', error);
     }
@@ -89,7 +89,7 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
       await conversation.startSession({
         agentId: agentId,
         connectionType: 'webrtc',
-        user_id: `user_${Date.now()}`,
+        userId: `user_${Date.now()}`,
       });
       
       setMode('voice');
@@ -413,7 +413,7 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
               <button
                 onClick={sendTextMessage}
                 disabled={!inputText.trim()}
-                className="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="bg-slate-500 text-white px-4 py-2 rounded-lg hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
               > 
                 Enviar
               </button>
