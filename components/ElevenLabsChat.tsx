@@ -32,6 +32,7 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
     onDisconnect: () => {
       setIsConnected(false);
       setMode('idle');
+      setIsSpeaking(false); // Reset speaking status
       console.log('Disconnected from ElevenLabs conversation');
     },
     onMessage: (message: any) => {
@@ -39,19 +40,25 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
       
       // Handle different message types from the conversation
       if (message.source === 'user') {
-        // User message (from voice or text)
-        setMessages(prev => [...prev, {
-          type: 'user',
-          text: typeof message === 'string' ? message : message.message || '',
-          timestamp: new Date()
-        }]);
+        // User message (from voice or text) - only show in chat mode
+        if (mode === 'chat') {
+          setMessages(prev => [...prev, {
+            type: 'user',
+            text: typeof message === 'string' ? message : message.message || '',
+            timestamp: new Date()
+          }]);
+        }
       } else if (message.source === 'ai') {
-        // AI agent response
-        setMessages(prev => [...prev, {
-          type: 'agent',
-          text: typeof message === 'string' ? message : message.message || '',
-          timestamp: new Date()
-        }]);
+        // AI agent response - only show in chat mode
+        if (mode === 'chat') {
+          setMessages(prev => [...prev, {
+            type: 'agent',
+            text: typeof message === 'string' ? message : message.message || '',
+            timestamp: new Date()
+          }]);
+        }
+        // Update speaking status for voice mode
+        setIsSpeaking(true);
       }
     },
     onError: (error: any) => {
@@ -60,7 +67,65 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
     }
   });
 
-  // Auto-scroll to bottom when new messages arrive
+  // Sound meter component for voice mode
+  const SoundMeter = ({ isActive }: { isActive: boolean }) => {
+    const [volumeLevels, setVolumeLevels] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
+    
+    useEffect(() => {
+      if (!isActive) {
+        setVolumeLevels([0, 0, 0, 0, 0, 0, 0, 0]);
+        return;
+      }
+      
+      const interval = setInterval(() => {
+        // Generate realistic volume levels based on a sine wave pattern
+        const time = Date.now() * 0.003; // Speed of animation
+        setVolumeLevels(prev => prev.map((_, index) => {
+          const offset = index * 0.5; // Stagger the bars
+          const wave = Math.sin(time + offset) * 0.5 + 0.5; // Normalize to 0-1
+          const noise = Math.random() * 0.3; // Add some randomness
+          return Math.min(1, Math.max(0, wave + noise));
+        }));
+      }, 50); // Update 20 times per second for smooth animation
+      
+      return () => clearInterval(interval);
+    }, [isActive]);
+    
+    return (
+      <div className="relative flex flex-col items-center justify-center w-full">
+        {/* Outer circle */}
+        <div className="w-32 h-32 border-4 border-slate-300 rounded-full flex items-center justify-center">
+          {/* Inner animated lines */}
+          <div className="flex items-center justify-center gap-1">
+            {volumeLevels.map((volume, i) => (
+              <div
+                key={i}
+                className={`w-1 rounded-full transition-all duration-75 ${
+                  isActive 
+                    ? 'bg-blue-500' 
+                    : 'bg-slate-300'
+                }`}
+                style={{
+                  height: `${20 + (volume * 40)}px`, // 20px to 60px based on volume
+                  opacity: isActive ? 0.7 + (volume * 0.3) : 0.5, // Opacity based on volume
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        
+        {/* Status text */}
+        <div className="text-center mt-4">
+          <p className="text-lg font-semibold text-slate-700">
+            {isActive ? 'Agente Hablando' : 'Esperando...'}
+          </p>
+          <p className="text-sm text-slate-500 mt-1">
+            Habla con el micrófono para interactuar
+          </p>
+        </div>
+      </div>
+    );
+  };
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -284,7 +349,7 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
     }
   };
 
-  return (
+    return (
     <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-slate-500 text-white p-4">
@@ -303,61 +368,85 @@ export default function ElevenLabsChat({ agentId, title }: ElevenLabsChatProps) 
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] p-3 rounded-lg ${
-                message.type === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
-            >
-              <p className="text-sm">{message.text}</p>
-              <p className="text-xs opacity-70 mt-1">
-                {message.timestamp.toLocaleTimeString()}
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden relative">
+        {mode === 'voice' ? (
+          // Voice mode: Show sound meter - perfectly centered in the entire component
+          <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translateY(-8px)' }}>
+            <div className="flex flex-col items-center justify-center w-full h-full">
+              <SoundMeter isActive={isSpeaking} />
+            </div>
+          </div>
+        ) : mode === 'chat' ? (
+          // Chat mode: Show message history
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.type === 'user'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  <p className="text-sm">{message.text}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {message.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+            
+            {/* Typing Animation */}
+            {isTyping && mode === 'chat' && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
+                  <div className="flex items-center gap-1">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                    <span className="text-xs text-gray-500 ml-2">El agente está escribiendo...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
+                  <p className="text-sm">Conectando...</p>
+                </div>
+              </div>
+            )}
+            
+            {error && (
+              <div className="flex justify-center">
+                <div className="bg-red-100 text-red-800 p-3 rounded-lg">
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        ) : (
+          // Idle mode: Show welcome - absolutely centered
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                Bienvenido al Asistente Virtual
+              </h3>
+              <p className="text-slate-500">
+                Selecciona una opción para comenzar
               </p>
             </div>
           </div>
-        ))}
-        
-        {/* Typing Animation */}
-        {isTyping && mode === 'chat' && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-                <span className="text-xs text-gray-500 ml-2">El agente está escribiendo...</span>
-              </div>
-            </div>
-          </div>
         )}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
-              <p className="text-sm">Conectando...</p>
-            </div>
-          </div>
-        )}
-        
-        {error && (
-          <div className="flex justify-center">
-            <div className="bg-red-100 text-red-800 p-3 rounded-lg">
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Control Area */}
