@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useConversation } from "@elevenlabs/react";
-import { IoSend, IoCall } from "react-icons/io5";
+import { Send, PhoneOff } from "lucide-react";
 
 interface ElevenLabsChatProps {
   agentId: string;
@@ -29,7 +29,6 @@ export default function ElevenLabsChat({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const chatWebSocketRef = useRef<WebSocket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const scrollLockRef = useRef<boolean>(false);
 
   const conversation = useConversation({
     onConnect: () => {
@@ -271,23 +270,23 @@ export default function ElevenLabsChat({
     );
   };
 
-  // Prevent page scroll during mode changes only
+    // Prevent page scroll during mode changes only
   useEffect(() => {
     if (mode === "chat" || mode === "voice") {
       // Store current scroll position
       const currentScrollY = window.scrollY;
-      
+
       // Brief lock to prevent initial jump
       const preventInitialScroll = () => {
         window.scrollTo(0, currentScrollY);
       };
-      
+
       // Prevent scroll for a very brief moment
       preventInitialScroll();
       setTimeout(preventInitialScroll, 0);
       setTimeout(preventInitialScroll, 50);
     }
-  }, [mode]);
+  }, []); // Remove mode dependency as it's not needed for this effect
 
   // Auto-scroll chat messages to bottom (internal scroll only)
   useEffect(() => {
@@ -353,7 +352,7 @@ export default function ElevenLabsChat({
       const wsUrl = `wss://api.elevenlabs.io/v1/convai/conversation?agent_id=${agentId}`;
       const ws = new WebSocket(wsUrl);
 
-              ws.onopen = () => {
+      ws.onopen = () => {
         console.log("Chat WebSocket connected");
         setIsConnected(true);
         setMode("chat");
@@ -590,9 +589,9 @@ export default function ElevenLabsChat({
           <div 
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 md:space-y-4 min-h-0 max-h-full"
-            style={{ 
-              scrollBehavior: 'smooth',
-              overscrollBehavior: 'contain' // Prevent scroll chaining to parent
+            style={{
+              scrollBehavior: "smooth",
+              overscrollBehavior: "contain", // Prevent scroll chaining to parent
             }}
           >
             {messages.map((message, index) => (
@@ -701,10 +700,10 @@ export default function ElevenLabsChat({
             <div className="flex justify-center">
               <button
                 className="bg-red-600 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full hover:bg-red-700 flex items-center justify-center transition-colors"
-                onClick={stopConversation}
                 title="Finalizar llamada"
+                onClick={stopConversation}
               >
-                <IoCall className="w-5 h-5 sm:w-6 sm:h-6 rotate-[135deg]" />
+                <PhoneOff className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
           </div>
@@ -723,19 +722,19 @@ export default function ElevenLabsChat({
               <button
                 className="bg-slate-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-colors"
                 disabled={!inputText.trim()}
-                onClick={sendTextMessage}
                 title="Enviar mensaje"
+                onClick={sendTextMessage}
               >
-                <IoSend className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
             <div className="flex justify-center">
               <button
                 className="bg-red-600 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full hover:bg-red-700 flex items-center justify-center transition-colors"
-                onClick={stopConversation}
                 title="Finalizar chat"
+                onClick={stopConversation}
               >
-                <IoCall className="w-5 h-5 sm:w-6 sm:h-6 rotate-[135deg]" />
+                <PhoneOff className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
           </div>
