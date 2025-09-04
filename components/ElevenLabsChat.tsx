@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useConversation } from "@elevenlabs/react";
+import { IoSend, IoCall } from "react-icons/io5";
 
 interface ElevenLabsChatProps {
   agentId: string;
@@ -697,12 +698,15 @@ export default function ElevenLabsChat({
             <p className="text-xs sm:text-sm text-gray-600 mb-2 leading-tight">
               🎤 Habla por micrófono para comunicarte con el agente
             </p>
-            <button
-              className="w-full bg-red-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-red-700 text-xs sm:text-sm font-medium"
-              onClick={stopConversation}
-            >
-              Finalizar Llamada
-            </button>
+            <div className="flex justify-center">
+              <button
+                className="bg-red-600 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full hover:bg-red-700 flex items-center justify-center transition-colors"
+                onClick={stopConversation}
+                title="Finalizar llamada"
+              >
+                <IoCall className="w-5 h-5 sm:w-6 sm:h-6 rotate-[135deg]" />
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
@@ -717,19 +721,23 @@ export default function ElevenLabsChat({
                 onKeyPress={handleKeyPress}
               />
               <button
-                className="bg-slate-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-xs sm:text-sm font-medium flex-shrink-0"
+                className="bg-slate-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-colors"
                 disabled={!inputText.trim()}
                 onClick={sendTextMessage}
+                title="Enviar mensaje"
               >
-                Enviar
+                <IoSend className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
-            <button
-              className="w-full bg-red-600 text-white py-2 px-3 sm:px-4 rounded-lg hover:bg-red-700 text-xs sm:text-sm font-medium"
-              onClick={stopConversation}
-            >
-              Finalizar Chat
-            </button>
+            <div className="flex justify-center">
+              <button
+                className="bg-red-600 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full hover:bg-red-700 flex items-center justify-center transition-colors"
+                onClick={stopConversation}
+                title="Finalizar chat"
+              >
+                <IoCall className="w-5 h-5 sm:w-6 sm:h-6 rotate-[135deg]" />
+              </button>
+            </div>
           </div>
         )}
       </div>
