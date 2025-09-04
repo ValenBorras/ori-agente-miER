@@ -88,6 +88,7 @@ export default function ElevenLabsChat({
       0, 0, 0, 0, 0, 0, 0, 0,
     ]);
     const [userVolume, setUserVolume] = useState<number>(0);
+    const [breathingEffect, setBreathingEffect] = useState<number>(0);
     const audioContextRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
     const microphoneRef = useRef<MediaStreamAudioSourceNode | null>(null);
@@ -104,10 +105,10 @@ export default function ElevenLabsChat({
 
           audioContextRef.current = new AudioContext();
           analyserRef.current = audioContextRef.current.createAnalyser();
-          analyserRef.current.fftSize = 1024; // Higher resolution for better sensitivity
-          analyserRef.current.smoothingTimeConstant = 0.1; // Less smoothing for more responsive
-          analyserRef.current.minDecibels = -100; // Much lower threshold for maximum sensitivity
-          analyserRef.current.maxDecibels = -10;
+          analyserRef.current.fftSize = 2048; // Higher resolution for better sensitivity
+          analyserRef.current.smoothingTimeConstant = 0.05; // Less smoothing for more responsive movement
+          analyserRef.current.minDecibels = -120; // Much lower threshold for maximum sensitivity
+          analyserRef.current.maxDecibels = -5;
 
           microphoneRef.current =
             audioContextRef.current.createMediaStreamSource(stream);
@@ -141,19 +142,19 @@ export default function ElevenLabsChat({
                 const normalizedVolume = rms / 255; // Normalize to 0-1
 
                 // Apply different sensitivity multipliers for each bar to balance them
-                let sensitivityMultiplier = 8; // Default sensitivity
+                let sensitivityMultiplier = 15; // Increased default sensitivity
 
                 // Reduce sensitivity for the first bar (low frequencies) and increase for others
                 if (i === 0) {
-                  sensitivityMultiplier = 3; // Much lower sensitivity for the leftmost bar
+                  sensitivityMultiplier = 8; // Increased sensitivity for the leftmost bar
                 } else if (i === 1) {
-                  sensitivityMultiplier = 5; // Lower sensitivity for second bar
+                  sensitivityMultiplier = 12; // Increased sensitivity for second bar
                 } else if (i === 2) {
-                  sensitivityMultiplier = 6; // Medium sensitivity for third bar
+                  sensitivityMultiplier = 14; // Increased sensitivity for third bar
                 } else if (i >= 3 && i <= 5) {
-                  sensitivityMultiplier = 8; // Normal sensitivity for middle bars
+                  sensitivityMultiplier = 15; // Increased sensitivity for middle bars
                 } else {
-                  sensitivityMultiplier = 10; // Higher sensitivity for rightmost bars (high frequencies)
+                  sensitivityMultiplier = 18; // Higher sensitivity for rightmost bars (high frequencies)
                 }
 
                 const smoothedVolume = Math.min(
@@ -217,13 +218,24 @@ export default function ElevenLabsChat({
       // Always monitor user volume when in voice mode, regardless of agent status
       if (!isActive && userVolume === 0) {
         setVolumeLevels([0, 0, 0, 0, 0, 0, 0, 0]);
-
+        setBreathingEffect(0);
         return;
       }
 
-      // No need for interval since we're using real frequency data from the audio analyser
-      // The volumeLevels are updated directly in the monitorUserAudio function
-    }, [userVolume]); // Remove isActive dependency, only depend on userVolume
+      // Add breathing effect when agent is speaking but user is not
+      if (isActive && userVolume < 0.1) {
+        const breathingInterval = setInterval(() => {
+          setBreathingEffect(prev => {
+            const newValue = prev + 0.02;
+            return newValue > 1 ? 0 : newValue;
+          });
+        }, 50);
+        
+        return () => clearInterval(breathingInterval);
+      } else {
+        setBreathingEffect(0);
+      }
+    }, [userVolume, isActive]); // Add isActive dependency
 
     return (
       <div className="relative flex flex-col items-center justify-center w-full px-4">
@@ -231,23 +243,29 @@ export default function ElevenLabsChat({
         <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 border-2 sm:border-3 md:border-4 border-slate-300 rounded-full flex items-center justify-center">
           {/* Inner animated lines */}
           <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-            {volumeLevels.map((volume, i) => (
-              <div
-                key={i}
-                className={`w-0.5 sm:w-1 rounded-full transition-all duration-75 ${
-                  userVolume > 0.3
-                    ? "bg-green-500" // Green when user is speaking
-                    : isActive
-                      ? "bg-blue-500" // Blue when agent is speaking
-                      : "bg-slate-300" // Gray when neither is speaking
-                }`}
-                style={{
-                  height: `${Math.max(12, 12 + volume * 24)}px`, // Responsive: min 12px, up to 36px based on volume
-                  opacity:
-                    userVolume > 0.3 || isActive ? 0.7 + volume * 0.3 : 0.5, // Opacity based on volume
-                }}
-              />
-            ))}
+            {volumeLevels.map((volume, i) => {
+              // Add breathing effect when agent is speaking
+              const breathingMultiplier = isActive && userVolume < 0.1 ? 0.3 + (breathingEffect * 0.4) : 1;
+              const finalVolume = volume * breathingMultiplier;
+              
+              return (
+                <div
+                  key={i}
+                  className={`w-0.5 sm:w-1 rounded-full transition-all duration-150 ease-out ${
+                    userVolume > 0.3
+                      ? "bg-green-500" // Green when user is speaking
+                      : isActive
+                        ? "bg-blue-500" // Blue when agent is speaking
+                        : "bg-slate-300" // Gray when neither is speaking
+                  }`}
+                  style={{
+                    height: `${Math.max(12, 12 + finalVolume * 32)}px`, // Increased range: min 12px, up to 44px based on volume
+                    opacity:
+                      userVolume > 0.3 || isActive ? 0.8 + finalVolume * 0.2 : 0.6, // Improved opacity range
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
