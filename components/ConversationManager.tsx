@@ -50,11 +50,11 @@ export enum ConversationStatus {
 
 export const useConversationManager = (props: ConversationManagerProps) => {
   const {
-  agentId,
-  apiKey,
-  onStatusChange,
-  onUserMessage,
-  onAgentMessage,
+    agentId,
+    apiKey,
+    onStatusChange,
+    onUserMessage,
+    onAgentMessage,
     onError,
   } = props;
   const { avatarRef } = useStreamingAvatarContext();
@@ -309,5 +309,3 @@ export const useConversationManager = (props: ConversationManagerProps) => {
     isResponding: status === ConversationStatus.RESPONDING,
   };
 };
-
-

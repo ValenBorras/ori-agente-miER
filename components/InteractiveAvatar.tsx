@@ -196,7 +196,7 @@ function InteractiveAvatar() {
           )}
         </div>
       </div>
-      
+
       {sessionState === StreamingAvatarSessionState.CONNECTED && (
         <MessageHistory />
       )}

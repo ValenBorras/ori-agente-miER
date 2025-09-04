@@ -244,18 +244,15 @@ export function PlayIcon({
 }: IconSvgProps) {
   return (
     <svg
+      className={className}
       fill="none"
       height={size || height}
       viewBox="0 0 24 24"
       width={size || width}
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
       {...props}
     >
-      <path
-        d="M8 5v14l11-7z"
-        fill="currentColor"
-      />
+      <path d="M8 5v14l11-7z" fill="currentColor" />
     </svg>
   );
 }
@@ -269,18 +266,15 @@ export function PauseIcon({
 }: IconSvgProps) {
   return (
     <svg
+      className={className}
       fill="none"
       height={size || height}
       viewBox="0 0 24 24"
       width={size || width}
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
       {...props}
     >
-      <path
-        d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
-        fill="currentColor"
-      />
+      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor" />
     </svg>
   );
 }
@@ -294,18 +288,15 @@ export function StopIcon({
 }: IconSvgProps) {
   return (
     <svg
+      className={className}
       fill="none"
       height={size || height}
       viewBox="0 0 24 24"
       width={size || width}
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
       {...props}
     >
-      <path
-        d="M6 6h12v12H6V6z"
-        fill="currentColor"
-      />
+      <path d="M6 6h12v12H6V6z" fill="currentColor" />
     </svg>
   );
 }

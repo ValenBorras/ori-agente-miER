@@ -313,7 +313,9 @@ export class ElevenLabsConversationService {
           // Convert to base64
           const uint8Array = new Uint8Array(pcmData.buffer);
           const base64Data = btoa(
-            Array.from(uint8Array, byte => String.fromCharCode(byte)).join(''),
+            Array.from(uint8Array, (byte) => String.fromCharCode(byte)).join(
+              "",
+            ),
           );
 
           this.sendMessage({

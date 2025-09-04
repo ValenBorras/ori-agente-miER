@@ -31,7 +31,6 @@ import { useMemoizedFn, useUnmount } from "ahooks";
 import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { ChromaKeyAvatar } from "./ChromaKeyAvatar";
-import { LoadingIcon } from "./Icons";
 
 import { ENV_IDS } from "@/app/lib/constants";
 
@@ -360,7 +359,6 @@ function HeyGenPuppetComponent({
           />
         </div>
       )}
-
     </div>
   );
 }

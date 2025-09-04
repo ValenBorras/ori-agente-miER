@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function NavBar() {
   return (
-    <nav className="pl-5 md:pl-28 bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200/50 sticky top-0 z-20">
+    <nav className="pl-5 md:pl-28 bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200/50 fixed top-0 left-0 right-0 z-30">
       <div className="flex flex-row justify-between items-center w-full max-w-6xl m-auto p-2 md:p-2 h-fit">
         <div className="flex flex-row items-center gap-2 md:gap-3">
           <Link href="https://www.mientrerios.gob.ar/" target="_blank">

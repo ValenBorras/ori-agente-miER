@@ -11,7 +11,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-
 import { useMemoizedFn, useUnmount } from "ahooks";
 
 import { Button } from "./Button";
@@ -69,14 +68,15 @@ function MinimalistElevenLabsAvatarComponent({
    * Start audio monitoring when conversation is active and microphone is enabled
    */
   useEffect(() => {
-    const shouldMonitor = conversationState !== ConversationState.INACTIVE && !isMuted;
-    
+    const shouldMonitor =
+      conversationState !== ConversationState.INACTIVE && !isMuted;
+
     if (shouldMonitor) {
       // Start monitoring
       const startMonitoring = async () => {
         try {
           console.log("🎤 Starting audio monitoring...");
-          
+
           // Stop any existing monitoring
           if (animationFrameRef.current) {
             cancelAnimationFrame(animationFrameRef.current);
@@ -119,14 +119,19 @@ function MinimalistElevenLabsAvatarComponent({
                 cancelAnimationFrame(animationFrameRef.current);
                 animationFrameRef.current = null;
               }
+
               return;
             }
 
-            const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+            const dataArray = new Uint8Array(
+              analyserRef.current.frequencyBinCount,
+            );
+
             analyserRef.current.getByteFrequencyData(dataArray);
 
             // Calculate RMS (Root Mean Square) for better volume detection
             let sum = 0;
+
             for (let i = 0; i < dataArray.length; i++) {
               sum += dataArray[i] * dataArray[i];
             }
@@ -140,7 +145,9 @@ function MinimalistElevenLabsAvatarComponent({
 
             // Debug logging (only when speaking to avoid spam)
             if (isSpeaking && !isUserSpeaking) {
-              console.log(`🎤 Audio detected: volume=${volume.toFixed(2)}, threshold=5`);
+              console.log(
+                `🎤 Audio detected: volume=${volume.toFixed(2)}, threshold=5`,
+              );
             }
 
             setIsUserSpeaking(isSpeaking);
@@ -381,7 +388,7 @@ function MinimalistElevenLabsAvatarComponent({
   /**
    * Render conversation status
    */
-  
+
   /**
    * Render audio level indicator
    */
@@ -406,24 +413,16 @@ function MinimalistElevenLabsAvatarComponent({
           // Adjust thresholds for RMS values (RMS typically ranges 0-128)
           const threshold = bar * 3; // Reduced from 4 to 3 for better sensitivity
           const isActive = audioLevel > threshold;
-          
+
           return (
             <div
               key={bar}
               className={`w-0.5 sm:w-0.5 md:w-1 rounded-full transition-all duration-100 ${
-                isMuted
-                  ? "bg-white"
-                  : isActive
-                    ? "bg-green-500"
-                    : "bg-gray-400"
+                isMuted ? "bg-white" : isActive ? "bg-green-500" : "bg-gray-400"
               }`}
               style={{
                 height: `${bar * 4}px`, // Increased from 2.5 to 4 for taller bars
-                opacity: isMuted
-                  ? 0.8
-                  : isActive
-                    ? 1
-                    : 0.4,
+                opacity: isMuted ? 0.8 : isActive ? 1 : 0.4,
               }}
             />
           );
@@ -462,10 +461,6 @@ function MinimalistElevenLabsAvatarComponent({
             />
           </div>
         </div>
-
-
-
-
       </div>
 
       {/* Control Panel */}
@@ -478,7 +473,6 @@ function MinimalistElevenLabsAvatarComponent({
             >
               Comenzar Conversación
             </Button>
-            
           </div>
         ) : isLoading || conversationState === ConversationState.CONNECTING ? (
           <div className="flex items-center gap-2 text-white mt-4 sm:mt-3 text-sm sm:text-base">
@@ -487,7 +481,6 @@ function MinimalistElevenLabsAvatarComponent({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 sm:gap-2 mt-4 sm:mt-3 w-full">
-
             {/* Control Buttons */}
             <div className="flex items-center justify-center gap-2 sm:gap-3 w-full">
               {/* Audio Level Indicator */}
@@ -509,8 +502,8 @@ function MinimalistElevenLabsAvatarComponent({
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
                 </svg>
               </button>
 
@@ -525,7 +518,7 @@ function MinimalistElevenLabsAvatarComponent({
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
                 </svg>
               </button>
             </div>

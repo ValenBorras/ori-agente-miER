@@ -36,20 +36,25 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontMono.variable} font-sans`}
       lang="en"
     >
-      <head />
-      <body className="h-screen text-slate-700 overflow-hidden">
+      <head>
+        <meta
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+          name="viewport"
+        />
+      </head>
+      <body className="h-screen text-slate-700">
         {/* Fixed background image */}
-        <div 
+        <div
           className="fixed inset-0 bg-cover bg-center bg-no-repeat bg-fixed z-0"
           style={{
             backgroundImage: "url(/gobER-expandida.webp)",
           }}
         />
-        
+
         {/* Content container with navbar, scrollable main, and footer */}
-        <div className="relative z-10 h-full flex flex-col max-w-7xl mx-auto">
+        <div className="relative z-10 h-screen flex flex-col max-w-7xl mx-auto overflow-hidden">
           <NavBar />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-16 sm:pb-20 pt-16 sm:pt-20">
             {children}
           </main>
           <Footer />
