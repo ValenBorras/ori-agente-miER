@@ -19,10 +19,12 @@
     "ahooks": "^3.8.4",
     "lucide-react": "^0.542.0",
     "next": "^15.3.0",
-    "openai": "^4.52.1",
+    "openai": "^4.104.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.3.1",

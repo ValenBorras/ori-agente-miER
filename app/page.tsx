@@ -1,6 +1,7 @@
 "use client";
 
 import ElevenLabsChat from "@/components/ElevenLabsChat";
+import Chat from "./components/Chat";
 
 export default function App() {
   return (
@@ -18,10 +19,14 @@ export default function App() {
             className="w-full max-w-4xl px-4 sm:px-6 md:px-8 pb-2"
             style={{ height: "calc(100vh - 255px)" }}
           >
-            <ElevenLabsChat
-              agentId="agent_6501k48f25taeztas78wnx0rpgxr"
-              title="Asistente para Docentes"
-            />
+            <Chat
+  title="Ori Docentes"
+  promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
+  vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
+  initialMessages={[
+  { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+]}
+/>
           </div>
         </section>
 
@@ -34,10 +39,14 @@ export default function App() {
             className="w-full max-w-4xl px-4 sm:px-6 md:px-8"
             style={{ height: "calc(100vh - 255px)" }}
           >
-            <ElevenLabsChat
-              agentId="agent_6701k48e6gs2fdqte1q1ewwb0gsj"
-              title="Asistente para Padres"
-            />
+            <Chat
+  title="Ori Padres"
+  promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
+  vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
+  initialMessages={[
+  { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+]}
+/>
           </div>
         </section>
       </div>
