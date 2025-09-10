@@ -1,7 +1,6 @@
 {
   "prompts": [
     "Las respuestas tienen que ser cortas, rapidas de leer y faciles de entender.",
-    "No respondas usando la palabra 'fácil'.",
-    "Presentate, tu nombre es ori y estas para ayudar."
+    "Formatea las respuestas en markdown, usando letra negrita, bullet lists y italic cuando sea necesario."
   ]
 }

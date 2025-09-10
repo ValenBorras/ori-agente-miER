@@ -10,7 +10,7 @@ export default function App() {
       {/* Container principal - Flex column en móvil, Flex row en desktop */}
       <div className="flex flex-col lg:flex-row w-full min-h-screen">
         {/* Chat para Docentes */}
-        <section
+        {/* <section
           className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8"
           style={{ minHeight: "calc(100vh - 120px)" }}
         >
@@ -19,17 +19,61 @@ export default function App() {
             style={{ height: "calc(100vh - 255px)" }}
           >
             <Chat
-  title="Ori Docentes"
-  promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
-  vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
-  initialMessages={[
-  { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
-]}
-/>
+              title="Ori Docentes"
+              promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
+              vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
+              initialMessages={[
+              { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+            ]}
+              Streaming={false}
+              model="gpt-4.1-mini"
+            />
+          </div>
+        </section> */}
+                {/* Chat para Docentes con streaming (modelo mas rapido y mas barato) */}
+                <section
+          className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8"
+          style={{ minHeight: "calc(100vh - 120px)" }}
+        >
+          <div
+            className="w-full max-w-4xl px-4 sm:px-6 md:px-8 pb-2"
+            style={{ height: "calc(100vh - 255px)" }}
+          >
+            <Chat
+              title="Ori Docentes - Streaming"
+              promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
+              vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
+              initialMessages={[
+              { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+            ]}
+              Streaming={true}
+              model="gpt-4.1-mini"
+            />
           </div>
         </section>
 
         {/* Chat para Padres */}
+        {/* <section
+          className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8"
+          style={{ minHeight: "calc(100vh - 120px)" }}
+        >
+          <div
+            className="w-full max-w-4xl px-4 sm:px-6 md:px-8"
+            style={{ height: "calc(100vh - 255px)" }}
+          >
+            <Chat
+              title="Ori Padres"
+              promptId="pmpt_68c177972758819093870b13767d802303897738f4440ef1"
+              vectorStoreId="vs_68c1775468c481918ecd662065cc6314"
+              initialMessages={[
+              { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+            ]}
+              Streaming={false}
+              model="gpt-4.1-mini"
+            />
+          </div>
+        </section> */}
+        {/* Chat para Padres con streaming  */}
         <section
           className="w-full lg:w-1/2 flex items-center justify-center p-3 sm:p-6 md:p-8"
           style={{ minHeight: "calc(100vh - 120px)" }}
@@ -39,13 +83,15 @@ export default function App() {
             style={{ height: "calc(100vh - 255px)" }}
           >
             <Chat
-  title="Ori Padres"
-  promptId="pmpt_68c177972758819093870b13767d802303897738f4440ef1"
-  vectorStoreId="vs_68c1775468c481918ecd662065cc6314"
-  initialMessages={[
-  { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
-]}
-/>
+              title="Ori Padres - Streaming"
+              promptId="pmpt_68c177972758819093870b13767d802303897738f4440ef1"
+              vectorStoreId="vs_68c1775468c481918ecd662065cc6314"
+              initialMessages={[
+              { role: "assistant", content: "¡Hola! ¿En qué puedo ayudarte?" }
+            ]}
+              Streaming={true}
+              model="gpt-4.1-mini"
+            />
           </div>
         </section>
       </div>

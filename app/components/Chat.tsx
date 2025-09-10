@@ -19,9 +19,11 @@ interface ChatProps {
   promptId: string;
   vectorStoreId: string;
   initialMessages?: Array<{ role: "user" | "assistant"; content: string }>;
+  Streaming?: boolean | "true" | "false";
+  model?: string;
 }
 
-export default function Chat({ title, promptId, vectorStoreId, initialMessages = [] }: ChatProps) {
+export default function Chat({ title, promptId, vectorStoreId, initialMessages = [], Streaming, model }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(
     initialMessages.map((m) => ({ ...m, timestamp: new Date() }))
   );
@@ -63,6 +65,7 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
 
     try {
       const messagesForSend = [...messages.filter((m) => !m.localOnly), userMessage].map(({ role, content }) => ({ role, content }));
+      const streamEnabled = typeof Streaming === "string" ? Streaming === "true" : Boolean(Streaming);
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,20 +73,69 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
           messages: messagesForSend,
           promptId,
           vectorStoreId,
+          stream: streamEnabled,
+          model,
         }),
       });
 
-      if (!res.ok) throw new Error("Error en la API");
+      if (!res.ok) {
+        try {
+          const errText = await res.text();
+          throw new Error(errText || "Error en la API");
+        } catch (e) {
+          throw new Error("Error en la API");
+        }
+      }
 
-      const data: { reply: string } = await res.json();
+      if (streamEnabled) {
+        if (!res.body) throw new Error("Sin cuerpo de respuesta para streaming");
+        // Insertar mensaje del asistente vacío para ir completándolo con el stream
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "", timestamp: new Date() },
+        ]);
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.reply,
-        timestamp: new Date(),
-      };
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantContent = "";
+        let updateTimeout: NodeJS.Timeout | null = null;
 
-      setMessages((prev) => [...prev, assistantMessage]);
+        const updateMessage = () => {
+          setMessages((prev) => {
+            if (prev.length === 0) return prev;
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last && last.role === "assistant") {
+              updated[updated.length - 1] = { ...last, content: assistantContent };
+            }
+            return updated;
+          });
+        };
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          if (!chunk) continue;
+          assistantContent += chunk;
+          
+          // Batch updates for better performance
+          if (updateTimeout) clearTimeout(updateTimeout);
+          updateTimeout = setTimeout(updateMessage, 16); // ~60fps
+        }
+        
+        // Final update to ensure all content is rendered
+        if (updateTimeout) clearTimeout(updateTimeout);
+        updateMessage();
+      } else {
+        const data: { reply: string } = await res.json();
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: data.reply,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     } catch (err) {
       console.error("Error al enviar mensaje:", err);
     } finally {
@@ -216,6 +268,7 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
                 {m.role === "assistant" ? (
                   <div className="text-xs sm:text-sm leading-snug">
                     <ReactMarkdown
+                      key={m.content} // Force re-render when content changes
                       remarkPlugins={[remarkGfm]}
                       components={{
                         p: ({ node, ...props }) => (
