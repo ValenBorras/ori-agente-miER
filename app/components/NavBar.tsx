@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function NavBar() {
+  const pathname = usePathname();
+  const isPrompts = pathname === "/prompts";
   return (
     <nav className="pl-5 md:pl-28 bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200/50 fixed top-0 left-0 right-0 z-30">
       <div className="flex flex-row justify-between items-center w-full max-w-6xl m-auto p-2 md:p-2 h-fit">
         <div className="flex flex-row items-center gap-2 md:gap-3">
-          <Link href="https://www.mientrerios.gob.ar/" target="_blank">
+          <Link href="/" target="_blank">
             <img
               alt="Mi Entre Rios"
               className="w-17 h-12 md:w-20 md:h-16"
@@ -19,6 +22,11 @@ export default function NavBar() {
               Demo Ori Interactiva - Cuidar Adolescencia - Mi Entre Rios
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-3 pr-4">
+          <Link href={isPrompts ? "/" : "/prompts"} className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-lime-600 bg-lime-500 rounded-md p-2">
+            {isPrompts ? "Volver" : "Gestionar Prompts"}
+          </Link>
         </div>
       </div>
     </nav>

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,12 +23,27 @@ export async function POST(req: NextRequest) {
     console.log("PromptId recibido:", promptId);
     console.log("VectorStoreId recibido:", vectorStoreId);
 
+    // Leer prompts del cliente y prependerlos como mensajes role:user
+    let promptMessages: { role: "user"; content: string }[] = [];
+    try {
+      const filePath = path.join(process.cwd(), "data/userPrompts.json");
+      if (fs.existsSync(filePath)) {
+        const fileData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        const userPrompts = Array.isArray(fileData?.prompts) ? fileData.prompts : [];
+        promptMessages = userPrompts
+          .filter((p: unknown) => typeof p === "string" && p.trim().length > 0)
+          .map((p: string) => ({ role: "user" as const, content: p.trim() }));
+      }
+    } catch (e) {
+      console.warn("No se pudieron leer userPrompts.json:", e);
+    }
+
     const requestBody = {
       model: "gpt-5",
       prompt: {
         id: promptId,
       },
-      input: messages,
+      input: [...promptMessages, ...messages],
       tools: [
         {
           type: "file_search",
