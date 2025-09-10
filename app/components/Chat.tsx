@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send } from "lucide-react";
+import { Send, Mic, Square } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  audioUrl?: string;
+  localOnly?: boolean;
+  durationMs?: number;
 };
 
 interface ChatProps {
@@ -27,6 +30,11 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
   const [isConnected] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordStartTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -37,26 +45,29 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
     }
   }, [messages, isTyping]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const sendTextMessage = async (text: string, options?: { suppressUserBubble?: boolean }) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
     const userMessage: Message = {
       role: "user",
-      content: input.trim(),
+      content: trimmed,
       timestamp: new Date(),
     };
 
-    const newMessages: Message[] = [...messages, userMessage];
-    setMessages(newMessages);
+    if (!options?.suppressUserBubble) {
+      setMessages([...messages, userMessage]);
+    }
     setInput("");
     setIsTyping(true);
 
     try {
+      const messagesForSend = [...messages.filter((m) => !m.localOnly), userMessage].map(({ role, content }) => ({ role, content }));
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages.map(({ role, content }) => ({ role, content })),
+          messages: messagesForSend,
           promptId,
           vectorStoreId,
         }),
@@ -77,6 +88,94 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
       console.error("Error al enviar mensaje:", err);
     } finally {
       setIsTyping(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    await sendTextMessage(input);
+  };
+
+  const startRecording = async () => {
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        alert("Tu navegador no soporta grabación de audio.");
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const durationMs = recordStartTimeRef.current ? Date.now() - recordStartTimeRef.current : undefined;
+
+          // Agregar burbuja de audio local (solo UI)
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "user",
+              content: "",
+              timestamp: new Date(),
+              audioUrl,
+              localOnly: true,
+              durationMs,
+            },
+          ]);
+          const formData = new FormData();
+          formData.append("file", audioBlob, "recording.webm");
+
+          const res = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            console.error("Error en transcripción", await res.text());
+            return;
+          }
+
+          const data = (await res.json()) as { text?: string };
+          if (data?.text) {
+            await sendTextMessage(data.text, { suppressUserBubble: true });
+          }
+        } catch (error) {
+          console.error("Error procesando audio:", error);
+        } finally {
+          // Liberar el micrófono
+          try {
+            mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+          } catch {}
+          mediaStreamRef.current = null;
+        }
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+      recordStartTimeRef.current = Date.now();
+    } catch (error) {
+      console.error("No se pudo iniciar la grabación:", error);
+      setIsRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    try {
+      mediaRecorderRef.current?.stop();
+    } catch (error) {
+      console.error("No se pudo detener la grabación:", error);
+    } finally {
+      setIsRecording(false);
+      recordStartTimeRef.current = null;
     }
   };
 
@@ -159,6 +258,13 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
                       {m.content}
                     </ReactMarkdown>
                   </div>
+                ) : m.audioUrl ? (
+                  <div className="flex items-center gap-3">
+                    <audio src={m.audioUrl} controls className="w-40 sm:w-56" />
+                    {typeof m.durationMs === "number" && (
+                      <span className="text-[10px] sm:text-xs opacity-80">{Math.round(m.durationMs / 1000)}s</span>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-xs sm:text-sm leading-relaxed">{m.content}</p>
                 )}
@@ -190,14 +296,34 @@ export default function Chat({ title, promptId, vectorStoreId, initialMessages =
         <div className="space-y-2">
           <div className="flex gap-2">
             <input
-              className="flex-1 border border-gray-300 rounded-lg px-2 sm:px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm min-w-0"
-              placeholder="Escribe tu mensaje..."
+              className={`flex-1 border border-gray-300 rounded-lg px-2 sm:px-3 py-2 focus:outline-none text-xs sm:text-sm min-w-0 ${
+                isRecording ? "ring-2 ring-red-500 animate-pulse" : "focus:ring-2 focus:ring-blue-500"
+              }`}
+              placeholder={isRecording ? "Grabando... toca detener para enviar" : "Escribe tu mensaje..."}
               style={{ fontSize: "16px" }}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => handleKeyPress(e)}
             />
+            <button
+              onClick={() => {
+                if (isRecording) stopRecording();
+                else startRecording();
+              }}
+              className={`${
+                isRecording
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+              } w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-colors`}
+              title={isRecording ? "Detener grabación" : "Grabar audio"}
+            >
+              {isRecording ? (
+                <Square className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              ) : (
+                <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
+            </button>
             <button
               className="bg-slate-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full hover:bg-slate-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-colors"
               disabled={!input.trim()}
