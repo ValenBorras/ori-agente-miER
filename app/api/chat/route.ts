@@ -8,12 +8,34 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const messages = (body?.messages ?? []) as { role: "user" | "assistant"; content: string }[];
-    const promptId = typeof body?.promptId === "string" && body.promptId.length > 0
-      ? body.promptId
-      : "pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1";
-    const vectorStoreId = typeof body?.vectorStoreId === "string" && body.vectorStoreId.length > 0
-      ? body.vectorStoreId
-      : "vs_68c07fd04c348191ab3e91538baf73ef";
+    const promptId = body?.promptId;
+    const vectorStoreId = body?.vectorStoreId;
+
+    if (!promptId || !vectorStoreId) {
+      return NextResponse.json(
+        { error: "promptId y vectorStoreId son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    console.log("PromptId recibido:", promptId);
+    console.log("VectorStoreId recibido:", vectorStoreId);
+
+    const requestBody = {
+      model: "gpt-5",
+      prompt: {
+        id: promptId,
+      },
+      input: messages,
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: [vectorStoreId],
+        },
+      ],
+    };
+
+    console.log("Body enviado a OpenAI:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -21,21 +43,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: "gpt-5",
-        prompt: {
-          id: promptId,
-        },
-        instructions:
-          "Format all outputs in Markdown with clear headings, bold for key terms, bullet lists with proper indentation, and fenced code blocks for code. Keep answers concise unless the user requests detail.",
-        input: messages,
-        tools: [
-          {
-            type: "file_search",
-            vector_store_ids: [vectorStoreId],
-          },
-        ],
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
