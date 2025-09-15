@@ -1,49 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { list, put } from "@vercel/blob";
 
-const dataDir = path.join(process.cwd(), "data");
-const filePath = path.join(dataDir, "userPrompts.json");
+const BLOB_PATH = "data/userPrompts.json";
 
-function ensureFile() {
+async function readData(): Promise<{ prompts: string[] }> {
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify({ prompts: [] }, null, 2), "utf-8");
+    const { blobs } = await list({ prefix: BLOB_PATH, limit: 1 });
+    if (blobs.length > 0) {
+      const res = await fetch(blobs[0].url, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === "object" && Array.isArray(data.prompts)) {
+          return { prompts: data.prompts as string[] };
+        }
+      }
     }
   } catch (error) {
-    console.error("No se pudo asegurar el archivo de prompts:", error);
+    console.error("Error leyendo prompts desde Blob:", error);
   }
+  return { prompts: [] };
 }
 
-function readData(): { prompts: string[] } {
-  ensureFile();
+async function writeData(data: { prompts: string[] }): Promise<void> {
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-    if (!data || typeof data !== "object" || !Array.isArray(data.prompts)) {
-      return { prompts: [] };
-    }
-    return { prompts: data.prompts as string[] };
+    await put(BLOB_PATH, JSON.stringify(data, null, 2), {
+      access: "public",
+      contentType: "application/json",
+      allowOverwrite: true,
+      cacheControlMaxAge: 60,
+    });
   } catch (error) {
-    console.error("Error leyendo prompts:", error);
-    return { prompts: [] };
-  }
-}
-
-function writeData(data: { prompts: string[] }) {
-  ensureFile();
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error) {
-    console.error("Error escribiendo prompts:", error);
+    console.error("Error escribiendo prompts a Blob:", error);
+    throw error;
   }
 }
 
 export async function GET() {
-  const data = readData();
+  const data = await readData();
   return NextResponse.json(data.prompts);
 }
 
@@ -53,9 +46,9 @@ export async function POST(req: NextRequest) {
     if (typeof prompt !== "string" || !prompt.trim()) {
       return NextResponse.json({ error: "prompt inválido" }, { status: 400 });
     }
-    const data = readData();
+    const data = await readData();
     data.prompts.push(prompt.trim());
-    writeData(data);
+    await writeData(data);
     return NextResponse.json({ success: true, prompts: data.prompts });
   } catch (error) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
@@ -72,12 +65,12 @@ export async function PUT(req: NextRequest) {
     if (typeof prompt !== "string" || !prompt.trim()) {
       return NextResponse.json({ error: "prompt inválido" }, { status: 400 });
     }
-    const data = readData();
+    const data = await readData();
     if (i < 0 || i >= data.prompts.length) {
       return NextResponse.json({ error: "índice fuera de rango" }, { status: 400 });
     }
     data.prompts[i] = prompt.trim();
-    writeData(data);
+    await writeData(data);
     return NextResponse.json({ success: true, prompts: data.prompts });
   } catch (error) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
@@ -91,12 +84,12 @@ export async function DELETE(req: NextRequest) {
     if (!Number.isInteger(i)) {
       return NextResponse.json({ error: "index inválido" }, { status: 400 });
     }
-    const data = readData();
+    const data = await readData();
     if (i < 0 || i >= data.prompts.length) {
       return NextResponse.json({ error: "índice fuera de rango" }, { status: 400 });
     }
     data.prompts.splice(i, 1);
-    writeData(data);
+    await writeData(data);
     return NextResponse.json({ success: true, prompts: data.prompts });
   } catch (error) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
