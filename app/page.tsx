@@ -40,7 +40,7 @@ export default function App() {
             style={{ height: "calc(100vh - 255px)" }}
           >
             <Chat
-              title="Ori Docentes - Streaming"
+              title="Ori Docentes"
               promptId="pmpt_68c08415be248196bbac0c2d47fd275f0b113e42284663e1"
               vectorStoreId="vs_68c07fd04c348191ab3e91538baf73ef"
               initialMessages={[
@@ -83,7 +83,7 @@ export default function App() {
             style={{ height: "calc(100vh - 255px)" }}
           >
             <Chat
-              title="Ori Padres - Streaming"
+              title="Ori Familias"
               promptId="pmpt_68c177972758819093870b13767d802303897738f4440ef1"
               vectorStoreId="vs_68c1775468c481918ecd662065cc6314"
               initialMessages={[
