@@ -23,11 +23,6 @@ export default function NavBar() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 pr-4">
-          <Link href={isPrompts ? "/" : "/prompts"} className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-lime-600 bg-lime-500 rounded-md p-2">
-            {isPrompts ? "Volver" : "Gestionar Prompts"}
-          </Link>
-        </div>
       </div>
     </nav>
   );
